@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
-import { MapContainer, TileLayer, CircleMarker, Polyline, Popup } from 'react-leaflet'
+import {
+  MapContainer,
+  TileLayer,
+  CircleMarker,
+  Polyline,
+  Popup,
+  useMap,
+  useMapEvents,
+} from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { PageHeader, Card, Field, TextInput, Select, DataRow, Button } from '../components/ui'
 import { PlaceSearch } from '../components/PlaceSearch'
@@ -10,12 +18,36 @@ import { CAPTURE_PARAMS } from '../lib/igacNorms'
 import { formatMinutes } from '../lib/format'
 import { buildPlan, planToCsv, planToKml, downloadText } from '../lib/planning'
 import { isoDate } from '../lib/gpsTime'
+import { COLOMBIA_CENTER, COLOMBIA_BOUNDS } from '../lib/colombia'
 
 const today = isoDate(new Date())
+
+function MapClick({ onPick }: { onPick: (p: LatLon) => void }) {
+  useMapEvents({ click: (e) => onPick({ lat: e.latlng.lat, lon: e.latlng.lng }) })
+  return null
+}
+
+function FitColombia() {
+  const map = useMap()
+  useEffect(() => {
+    map.fitBounds(COLOMBIA_BOUNDS)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  return null
+}
+
+function FlyTo({ target }: { target: LatLon | null }) {
+  const map = useMap()
+  useEffect(() => {
+    if (target) map.flyTo([target.lat, target.lon], 11, { duration: 0.8 })
+  }, [target, map])
+  return null
+}
 
 export default function PlanningPage() {
   const [projectName, setProjectName] = useState('')
   const [point, setPoint] = useState<(LatLon & { label?: string }) | null>(null)
+  const [flyTarget, setFlyTarget] = useState<LatLon | null>(null)
   const [latIn, setLatIn] = useState('')
   const [lonIn, setLonIn] = useState('')
   const [date, setDate] = useState(today)
@@ -64,10 +96,18 @@ export default function PlanningPage() {
     )
   }, [point, selected, projectName, date, endDate, order, excellent, latency])
 
+  function setQueryPoint(p: LatLon & { label?: string }) {
+    setPoint(p)
+    setFlyTarget({ lat: p.lat, lon: p.lon })
+  }
+
   function applyManual() {
+    if (latIn.trim() === '' || lonIn.trim() === '') return
     const la = Number(latIn)
     const lo = Number(lonIn)
-    if (Number.isFinite(la) && Number.isFinite(lo)) setPoint({ lat: la, lon: lo })
+    if (Number.isFinite(la) && Number.isFinite(lo) && Math.abs(la) <= 90 && Math.abs(lo) <= 180) {
+      setQueryPoint({ lat: la, lon: lo })
+    }
   }
 
   return (
@@ -87,7 +127,7 @@ export default function PlanningPage() {
               </Field>
               <div>
                 <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Punto</span>
-                <PlaceSearch onPick={(r) => setPoint({ lat: r.lat, lon: r.lon, label: r.label })} />
+                <PlaceSearch onPick={(r) => setQueryPoint({ lat: r.lat, lon: r.lon, label: r.label })} />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <TextInput type="number" step="any" placeholder="lat" value={latIn} onChange={(e) => setLatIn(e.target.value)} />
@@ -158,25 +198,56 @@ export default function PlanningPage() {
         </div>
 
         <div>
-          {!point && (
-            <Card><p className="text-sm text-slate-500">Busca un lugar o ingresa coordenadas para generar el plan.</p></Card>
-          )}
+          <div className="mb-4 overflow-hidden rounded-xl border border-slate-200 print:hidden dark:border-slate-800">
+            <MapContainer center={COLOMBIA_CENTER} zoom={6} style={{ height: '20rem', width: '100%' }}>
+              <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap" />
+              <FitColombia />
+              <FlyTo target={flyTarget} />
+              <MapClick onPick={(p) => setQueryPoint(p)} />
 
-          {point && (
-            <div className="mb-4 overflow-hidden rounded-xl border border-slate-200 print:hidden dark:border-slate-800">
-              <MapContainer center={[point.lat, point.lon]} zoom={9} style={{ height: '16rem', width: '100%' }}>
-                <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap" />
-                <CircleMarker center={[point.lat, point.lon]} radius={7} pathOptions={{ color: '#dc2626', fillColor: '#dc2626', fillOpacity: 0.5 }} />
-                {selected.map(({ station }) => (
+              {ACTIVE_STATIONS.map((s) => (
+                <CircleMarker
+                  key={s.id}
+                  center={[s.lat, s.lon]}
+                  radius={3}
+                  pathOptions={{ color: '#8b93a2', fillColor: '#8b93a2', fillOpacity: 0.6, weight: 0 }}
+                />
+              ))}
+
+              {selected.map(({ station }) =>
+                point ? (
                   <div key={station.id}>
-                    <Polyline positions={[[point.lat, point.lon], [station.lat, station.lon]]} pathOptions={{ color: '#111318', weight: 1.5, dashArray: '4 3' }} />
-                    <CircleMarker center={[station.lat, station.lon]} radius={5} pathOptions={{ color: '#111318', fillColor: '#4b5563', fillOpacity: 0.9 }}>
+                    <Polyline
+                      positions={[[point.lat, point.lon], [station.lat, station.lon]]}
+                      pathOptions={{ color: '#111318', weight: 1.5, dashArray: '4 3' }}
+                    />
+                    <CircleMarker
+                      center={[station.lat, station.lon]}
+                      radius={5}
+                      pathOptions={{ color: '#111318', fillColor: '#4b5563', fillOpacity: 0.95 }}
+                    >
                       <Popup>{station.id} — {station.name}</Popup>
                     </CircleMarker>
                   </div>
-                ))}
-              </MapContainer>
-            </div>
+                ) : null,
+              )}
+
+              {point && (
+                <CircleMarker
+                  center={[point.lat, point.lon]}
+                  radius={7}
+                  pathOptions={{ color: '#dc2626', fillColor: '#dc2626', fillOpacity: 0.5 }}
+                />
+              )}
+            </MapContainer>
+          </div>
+
+          {!point && (
+            <Card className="print:hidden">
+              <p className="text-sm text-slate-500">
+                Toca el mapa, busca un lugar o ingresa coordenadas para generar el plan.
+              </p>
+            </Card>
           )}
 
           {plan && <PlanReport plan={plan} />}

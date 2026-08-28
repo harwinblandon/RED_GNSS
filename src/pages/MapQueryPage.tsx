@@ -8,7 +8,6 @@ import {
   useMap,
   useMapEvents,
 } from 'react-leaflet'
-import type { LatLngBoundsExpression } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { PageHeader, Card, Field, TextInput, Select, Button } from '../components/ui'
 import { PlaceSearch } from '../components/PlaceSearch'
@@ -16,13 +15,8 @@ import { STATIONS, ACTIVE_STATIONS, type GnssStation } from '../data/stations'
 import { nearestStations, type LatLon } from '../lib/geodesy'
 import { project } from '../lib/coords'
 import { formatDms } from '../lib/format'
+import { COLOMBIA_CENTER, COLOMBIA_BOUNDS } from '../lib/colombia'
 
-const COLOMBIA_CENTER: [number, number] = [4.6, -73.5]
-// Recuadro de la Colombia continental (sin San Andrés) para el encuadre inicial.
-const COLOMBIA_BOUNDS: LatLngBoundsExpression = [
-  [-4.4, -79.2],
-  [13.5, -66.8],
-]
 const ORDER_COLOR = ['#111318', '#8b93a2'] // 0 = tinta · 1 = gris
 
 const DEPARTMENTS = [...new Set(STATIONS.map((s) => s.department))].filter(Boolean).sort()

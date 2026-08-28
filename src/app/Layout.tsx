@@ -42,7 +42,7 @@ export default function Layout() {
   return (
     <div className="min-h-full lg:grid lg:grid-cols-[16rem_1fr]">
       {/* Sidebar (escritorio) */}
-      <aside className="hidden border-r border-slate-200 bg-white lg:flex lg:flex-col dark:border-slate-800 dark:bg-slate-900">
+      <aside className="hidden border-r border-slate-200 bg-white lg:flex lg:flex-col dark:border-[#2c2e32] dark:bg-[#1c1d20]">
         <Brand />
         <div className="flex-1 overflow-y-auto p-3">
           <NavList />
@@ -52,7 +52,7 @@ export default function Layout() {
 
       {/* Cabecera móvil */}
       <div className="flex flex-col">
-        <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden dark:border-slate-800 dark:bg-slate-900">
+        <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden dark:border-[#2c2e32] dark:bg-[#1c1d20]">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setMobileOpen((o) => !o)}
@@ -67,13 +67,13 @@ export default function Layout() {
         </header>
 
         {mobileOpen && (
-          <div className="border-b border-slate-200 bg-white p-3 lg:hidden dark:border-slate-800 dark:bg-slate-900">
+          <div className="border-b border-slate-200 bg-white p-3 lg:hidden dark:border-[#2c2e32] dark:bg-[#1c1d20]">
             <NavList onNavigate={() => setMobileOpen(false)} />
           </div>
         )}
 
         {/* Barra superior (escritorio) */}
-        <div className="hidden items-center justify-end gap-3 border-b border-slate-200 bg-white/60 px-6 py-3 backdrop-blur lg:flex dark:border-slate-800 dark:bg-slate-900/60">
+        <div className="hidden items-center justify-end gap-3 border-b border-slate-200 bg-white/60 px-6 py-3 backdrop-blur lg:flex dark:border-[#2c2e32] dark:bg-[#1c1d20]/70">
           <span className="text-xs text-slate-500 dark:text-slate-400">
             Asistente de post-proceso GNSS diferencial
           </span>
@@ -90,9 +90,8 @@ export default function Layout() {
 
 function Brand() {
   return (
-    <div className="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
-      <LogoFull className="h-12" />
-      <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">Post-proceso GNSS</p>
+    <div className="border-b border-slate-200 p-3 dark:border-[#2c2e32]">
+      <LogoFull className="w-full" />
     </div>
   )
 }
@@ -111,7 +110,7 @@ function ThemeButton({ theme, onToggle }: { theme: string; onToggle: () => void 
 
 function Footer() {
   return (
-    <div className="border-t border-slate-200 px-5 py-3 text-xs text-slate-400 dark:border-slate-800 dark:text-slate-500">
+    <div className="border-t border-slate-200 px-5 py-3 text-xs text-slate-400 dark:border-[#2c2e32] dark:text-slate-500">
       H_TOPOGRAFÍA · datos IGAC · SIRGAS
     </div>
   )

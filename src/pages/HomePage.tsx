@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import { NAV_ITEMS } from '../app/navigation'
 import { StatusBadge } from '../components/ui'
-import { LogoFull } from '../components/Logo'
 
 export default function HomePage() {
   const features = NAV_ITEMS.filter((i) => i.path !== '/acerca-de')
@@ -9,7 +8,6 @@ export default function HomePage() {
   return (
     <div>
       <section className="mb-10">
-        <LogoFull className="mb-6 h-14" />
         <p className="text-sm font-medium text-brand-600 dark:text-brand-400">
           Geodesia · Topografía · Geomática
         </p>

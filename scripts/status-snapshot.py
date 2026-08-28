@@ -49,9 +49,16 @@ def latest_for(station: dict) -> tuple[str, dict]:
     return station["identificador"], {"lastDate": last, "files": count}
 
 
+# Mismas exclusiones que build-stations.py (coordenadas inconsistentes en la fuente).
+EXCLUDE = {"CALE", "CCBN", "NPRA", "PLRI", "VPAC"}
+
+
 def main() -> None:
     stations = json.loads(get("/estaciones"))
-    active = [s for s in stations if s.get("estado") == "Activa"]
+    active = [
+        s for s in stations
+        if s.get("estado") == "Activa" and s["identificador"] not in EXCLUDE
+    ]
     print(f"· {len(active)} estaciones activas", file=sys.stderr)
 
     result: dict[str, dict] = {}
