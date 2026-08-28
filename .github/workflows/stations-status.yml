@@ -1,0 +1,42 @@
+name: Snapshot de estado de estaciones
+
+# Actualiza public/stations-status.json con la fecha del último RINEX de cada
+# estación activa. La app lo usa como estado inicial del panel /estado.
+
+on:
+  schedule:
+    - cron: '17 6 * * *' # a diario, 06:17 UTC (~01:17 hora Colombia)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stations-status
+  cancel-in-progress: true
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generar snapshot
+        run: python scripts/status-snapshot.py
+
+      - name: Commit si cambió
+        run: |
+          if git diff --quiet -- public/stations-status.json; then
+            echo "Sin cambios."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/stations-status.json
+          git commit -m "chore: actualizar snapshot de estado de estaciones"
+          git push

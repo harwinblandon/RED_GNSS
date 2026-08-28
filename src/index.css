@@ -1,0 +1,99 @@
+@import 'tailwindcss';
+
+/* Modo oscuro controlado por la clase .dark en <html> (con fallback al sistema) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:
+    ui-monospace, 'JetBrains Mono', 'SFMono-Regular', 'Cascadia Code', Menlo,
+    Consolas, monospace;
+
+  /* Identidad H_TOPOGRAFÍA: monocroma, grafito de tono frío.
+     El 600 funciona con texto blanco tanto en claro como en oscuro. */
+  --color-brand-50: #f4f5f7;
+  --color-brand-100: #e5e7ea;
+  --color-brand-200: #cbced5;
+  --color-brand-300: #a4a9b4;
+  --color-brand-400: #6f7783;
+  --color-brand-500: #444b57;
+  --color-brand-600: #2c3038;
+  --color-brand-700: #23262d;
+  --color-brand-800: #191b21;
+  --color-brand-900: #101216;
+  --color-brand-950: #0a0b0e;
+}
+
+:root {
+  color-scheme: light;
+
+  /* Colores del logo */
+  --logo-fg: #101216;
+  --logo-badge: #101216;
+  --logo-badge-text: #ffffff;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --logo-fg: #e6e8ec;
+  --logo-badge: #e6e8ec;
+  --logo-badge-text: #101216;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-slate-50 text-slate-800 antialiased;
+  font-family: var(--font-sans);
+}
+
+.dark body {
+  @apply bg-slate-950 text-slate-200;
+}
+
+.logo-graticule {
+  opacity: 0.5;
+}
+
+/* Utilidad para valores numéricos (coordenadas, semana GPS, etc.) */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+/* Ajustes de Leaflet para modo oscuro */
+.dark .leaflet-container {
+  background: #0f172a;
+}
+.leaflet-container {
+  font: inherit;
+}
+
+/* Impresión: solo el reporte, sin cromo de la aplicación */
+@media print {
+  aside,
+  header,
+  .print\:hidden {
+    display: none !important;
+  }
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+  body,
+  .dark body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .report .rounded-xl {
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+}

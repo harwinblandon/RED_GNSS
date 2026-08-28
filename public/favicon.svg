@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <style>
+    :root { --fg: #101216; }
+    @media (prefers-color-scheme: dark) { :root { --fg: #e6e8ec; } }
+    .g { fill: none; stroke: var(--fg); stroke-width: 3; }
+    .d { stroke-dasharray: 10 8; stroke-width: 4; }
+  </style>
+  <g class="g">
+    <circle cx="100" cy="100" r="88" />
+    <line x1="100" y1="12" x2="100" y2="188" />
+    <ellipse cx="100" cy="100" rx="25" ry="88" />
+    <ellipse cx="100" cy="100" rx="52" ry="88" />
+    <ellipse cx="100" cy="100" rx="88" ry="18" />
+    <ellipse cx="100" cy="52" rx="74" ry="14" />
+    <ellipse cx="100" cy="148" rx="74" ry="14" />
+    <path class="d" d="M150 24 C 112 70, 78 150, 100 184" />
+    <path class="d" d="M16 124 C 70 145, 150 145, 186 108" />
+  </g>
+  <circle cx="100" cy="122" r="7" fill="var(--fg)" />
+</svg>
