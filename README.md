@@ -70,11 +70,13 @@ scripts/
 python scripts/build-stations.py
 ```
 
-280 estaciones de la Red MAGNA-ECO (213 activas). Fuente: API pública del
+275 estaciones de la Red MAGNA-ECO (208 activas). Fuente: API pública del
 **Centro de Control Geodésico del IGAC** (`https://ccg.igac.gov.co/api`) —
 orden oficial, coordenadas MAGNA-SIRGAS, DOMES, receptor/antena, fecha de
 materialización y el `tId` para los enlaces de RINEX. El script cachea las
-respuestas en `scripts/.cache/` (ignorado por git).
+respuestas en `scripts/.cache/` (ignorado por git) y excluye unas pocas
+estaciones cuyas coordenadas en la fuente no corresponden a su municipio
+(lista `EXCLUDE` en el script).
 
 ### Estado de estaciones
 

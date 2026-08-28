@@ -17,7 +17,12 @@ import { nearestStations, type LatLon } from '../lib/geodesy'
 import { project } from '../lib/coords'
 import { formatDms } from '../lib/format'
 
-const COLOMBIA_CENTER: [number, number] = [4.6, -74.1]
+const COLOMBIA_CENTER: [number, number] = [4.6, -73.5]
+// Recuadro de la Colombia continental (sin San Andrés) para el encuadre inicial.
+const COLOMBIA_BOUNDS: LatLngBoundsExpression = [
+  [-4.4, -79.2],
+  [13.5, -66.8],
+]
 const ORDER_COLOR = ['#111318', '#8b93a2'] // 0 = tinta · 1 = gris
 
 const DEPARTMENTS = [...new Set(STATIONS.map((s) => s.department))].filter(Boolean).sort()
@@ -35,10 +40,10 @@ function FlyTo({ target }: { target: LatLon | null }) {
   return null
 }
 
-function FitOnce({ bounds }: { bounds: LatLngBoundsExpression }) {
+function FitColombia() {
   const map = useMap()
   useEffect(() => {
-    map.fitBounds(bounds, { padding: [30, 30] })
+    map.fitBounds(COLOMBIA_BOUNDS)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   return null
@@ -68,11 +73,6 @@ export default function MapQueryPage() {
   const ranked = useMemo(
     () => (point ? nearestStations(point, ACTIVE_STATIONS, 6) : []),
     [point],
-  )
-
-  const fitBounds = useMemo<LatLngBoundsExpression>(
-    () => ACTIVE_STATIONS.map((s) => [s.lat, s.lon] as [number, number]),
-    [],
   )
 
   function applyManual() {
@@ -129,7 +129,7 @@ export default function MapQueryPage() {
               </LayersControl.BaseLayer>
             </LayersControl>
 
-            <FitOnce bounds={fitBounds} />
+            <FitColombia />
             <FlyTo target={flyTarget} />
             <ClickHandler onPick={setPoint} />
 

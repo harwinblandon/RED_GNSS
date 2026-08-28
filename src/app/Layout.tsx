@@ -61,7 +61,7 @@ export default function Layout() {
             >
               <MenuIcon />
             </button>
-            <LogoFull className="h-7 w-auto" />
+            <LogoFull className="h-9" />
           </div>
           <ThemeButton theme={theme} onToggle={toggle} />
         </header>
@@ -91,7 +91,7 @@ export default function Layout() {
 function Brand() {
   return (
     <div className="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
-      <LogoFull className="h-11 w-auto" />
+      <LogoFull className="h-12" />
       <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">Post-proceso GNSS</p>
     </div>
   )

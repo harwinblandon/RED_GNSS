@@ -1,20 +1,13 @@
 # Marca — H_TOPOGRAFÍA
 
-- `Logo-original.png` — logotipo entregado por el usuario (fondo blanco).
-- `process.py` — quita el fondo (relleno desde los bordes, conserva el texto del
-  recuadro), recorta márgenes y genera:
-  - `public/brand/logo.png` — para tema claro
-  - `public/brand/logo-invert.png` — RGB invertido, para tema oscuro
-- `remove-bg.py` — utilidad simple de fondo blanco → transparente (alternativa).
+- `Logo-original.png` — logotipo entregado por el usuario.
+- `public/brand/logo.png` — copia que usa la app (`src/components/Logo.tsx` → `LogoFull`).
 
-`src/components/Logo.tsx`:
-- `LogoFull` usa los PNG anteriores (cambia según `.dark`).
-- `LogoMark` es una versión vectorial simplificada del globo (espacios mínimos).
+El logo se muestra sobre una **placa blanca** en ambos temas (está diseñado para
+fondo claro; así queda legible también sobre la barra oscura). Para cambiarlo,
+reemplaza `public/brand/logo.png`.
 
-Regenerar tras cambiar el original:
-```bash
-python brand/process.py
-```
+`remove-bg.py` / `process.py` quedan como utilidades por si en el futuro se quiere
+una versión con fondo transparente.
 
-El favicon vectorial está en `public/favicon.svg`. Los colores del logo vectorial
-salen de las variables `--logo-*` en `src/index.css`.
+El favicon vectorial está en `public/favicon.svg`.

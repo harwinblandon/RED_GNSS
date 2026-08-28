@@ -30,7 +30,7 @@ const ROADMAP: { phase: string; items: string[]; done?: boolean }[] = [
 export default function AboutPage() {
   return (
     <div>
-      <LogoFull className="mb-6 h-20 w-auto" />
+      <LogoFull className="mb-6 h-16" />
       <PageHeader
         title="Acerca de"
         subtitle="Herramienta de H_TOPOGRAFÍA para apoyar el post-proceso de datos GNSS estáticos según la normativa geodésica colombiana. No sustituye el criterio profesional ni el software de ajuste."

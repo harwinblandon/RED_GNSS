@@ -9,7 +9,7 @@ export default function HomePage() {
   return (
     <div>
       <section className="mb-10">
-        <LogoFull className="mb-6 h-16 w-auto" />
+        <LogoFull className="mb-6 h-14" />
         <p className="text-sm font-medium text-brand-600 dark:text-brand-400">
           Geodesia · Topografía · Geomática
         </p>

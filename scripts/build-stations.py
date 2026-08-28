@@ -63,10 +63,19 @@ def titlecase_place(s: str) -> str:
     return " ".join(out).replace(" ,", ",")
 
 
+# Estaciones con coordenadas inconsistentes en la fuente (el municipio/departamento
+# declarado no corresponde a la posición: la estación queda a cientos de km).
+# Revisar en futuras regeneraciones por si el IGAC corrige el dato.
+EXCLUDE = {"CALE", "CCBN", "NPRA", "PLRI", "VPAC"}
+
+
 def build() -> str:
     print("· listado de estaciones IGAC…")
     lst = get_json("/estaciones")
-    lst = [s for s in lst if s.get("estado") in ("Activa", "Inactiva")]
+    lst = [
+        s for s in lst
+        if s.get("estado") in ("Activa", "Inactiva") and s["identificador"] not in EXCLUDE
+    ]
     print(f"  {len(lst)} estaciones (activas + inactivas)")
 
     rows = []
