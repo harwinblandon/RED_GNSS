@@ -4,7 +4,8 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // Ruta relativa para poder desplegar en subcarpetas (GitHub Pages, etc.)
-  base: './',
+  // En local sirve en la raíz; en el build de CI se pasa VITE_BASE=/RED_GNSS/
+  // para GitHub Pages (proyecto en subcarpeta).
+  base: process.env.VITE_BASE ?? '/',
   plugins: [react(), tailwindcss()],
 })
