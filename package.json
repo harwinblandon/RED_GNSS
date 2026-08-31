@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.4",
     "geographiclib-geodesic": "^2.2.0",
     "leaflet": "^1.9.4",
     "proj4": "^2.21.0",

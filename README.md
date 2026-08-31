@@ -39,6 +39,13 @@ npm run preview
 
 Node.js ≥ 20.
 
+## Autenticación
+
+Opcional. Si existen `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (secretos de
+GitHub / `.env.local`), la app exige inicio de sesión (Supabase Auth, correo +
+contraseña). Sin esas variables funciona abierta. Pasos de configuración en
+[SETUP-AUTH.md](SETUP-AUTH.md).
+
 ## Despliegue
 
 `.github/workflows/deploy.yml` compila y publica en **GitHub Pages** en cada push a
