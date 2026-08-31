@@ -152,9 +152,9 @@ export default function RinexAccessPage() {
 
             {!loading && !error && (
               <>
-                <div className="mb-3 flex items-center justify-between text-sm">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm">
                   <span className="text-slate-500">
-                    {shown.length} archivo(s){files.length ? ` de ${files.length}` : ''} · selecciona hasta {MAX_FILES}
+                    {shown.length} archivo(s){files.length ? ` de ${files.length}` : ''} · máx. {MAX_FILES}
                   </span>
                   <Button onClick={doDownload} disabled={selected.size === 0 || downloading}>
                     {downloading ? 'Descargando…' : `Descargar ZIP (${selected.size})`}
@@ -162,7 +162,33 @@ export default function RinexAccessPage() {
                 </div>
 
                 <div className="max-h-[28rem] overflow-auto rounded-lg border border-slate-200 dark:border-slate-800">
-                  <table className="w-full text-sm">
+                  {/* Móvil: lista de tarjetas */}
+                  <ul className="divide-y divide-slate-100 sm:hidden dark:divide-slate-800">
+                    {shown.map((f) => {
+                      const on = selected.has(f.url)
+                      return (
+                        <li
+                          key={f.url}
+                          onClick={() => toggle(f.url)}
+                          className={`flex cursor-pointer gap-3 p-3 ${on ? 'bg-brand-50 dark:bg-brand-950/40' : ''}`}
+                        >
+                          <input type="checkbox" readOnly checked={on} className="mt-0.5 size-4 shrink-0 accent-brand-600" />
+                          <div className="min-w-0 flex-1">
+                            <p className="tabular text-sm font-medium text-slate-800 dark:text-slate-200">{f.name}</p>
+                            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                              {f.date} · DOY {String(f.doy).padStart(3, '0')} · {f.kindLabel}
+                            </p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              RINEX {f.version} · {f.sampleRateS}s · sem. {f.gpsWeek}
+                            </p>
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+
+                  {/* Escritorio: tabla */}
+                  <table className="hidden w-full text-sm sm:table">
                     <thead className="sticky top-0 bg-slate-50 text-left text-xs text-slate-500 dark:bg-slate-900">
                       <tr>
                         <th className="w-8 p-2" />

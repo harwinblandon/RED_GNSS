@@ -35,6 +35,7 @@ export default function StationStatusPage() {
   const [op, setOp] = useState('')
   const [order, setOrder] = useState<'all' | '0' | '1'>('all')
   const [scope, setScope] = useState<'active' | 'all'>('active')
+  const [limit, setLimit] = useState(40)
   const [scan, setScan] = useState<{ running: boolean; done: number; total: number }>({
     running: false, done: 0, total: 0,
   })
@@ -60,6 +61,8 @@ export default function StationStatusPage() {
       })
     })
   }, [])
+
+  useEffect(() => setLimit(40), [q, dept, op, order, scope])
 
   const pool = scope === 'active' ? ACTIVE_STATIONS : STATIONS
   const filtered = useMemo(() => {
@@ -195,7 +198,63 @@ export default function StationStatusPage() {
         )}
       </Card>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+      {/* Móvil: tarjetas */}
+      <ul className="space-y-2 sm:hidden">
+        {sorted.slice(0, limit).map((s) => {
+          const row = status[s.id]
+          const last = row?.last ?? null
+          const level = classify(last)
+          const d = daysSince(last)
+          return (
+            <li
+              key={s.id}
+              className="rounded-xl border border-slate-200 bg-white p-3 dark:border-[#2c2e32] dark:bg-[#1f2124]"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-medium text-slate-900 dark:text-slate-100">
+                    {s.id}
+                    <span className="ml-1 text-xs font-normal text-slate-400">
+                      · orden {s.order}
+                      {s.status === 'inactive' && ' · inactiva'}
+                    </span>
+                  </p>
+                  <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                    {s.name}, {s.department} · {s.operator}
+                  </p>
+                </div>
+                <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${LEVEL_STYLE[level]}`}>
+                  {LEVEL_LABEL[level]}
+                </span>
+              </div>
+              <div className="mt-2 flex items-center justify-between text-xs">
+                <span className="tabular text-slate-500 dark:text-slate-400">
+                  Último dato: {last ?? '—'}
+                  {d != null && ` (${d} d)`}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => checkOne(s)}
+                    disabled={row?.checking}
+                    className="rounded border border-slate-300 px-2 py-1 hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800"
+                  >
+                    {row?.checking ? '…' : 'Verificar'}
+                  </button>
+                  <a
+                    href={`#/rinex?station=${s.id}`}
+                    className="rounded border border-slate-300 px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
+                  >
+                    RINEX
+                  </a>
+                </div>
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+
+      {/* Escritorio: tabla */}
+      <div className="hidden overflow-x-auto rounded-xl border border-slate-200 sm:block dark:border-slate-800">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-left text-xs text-slate-500 dark:bg-slate-900">
             <tr>
@@ -209,7 +268,7 @@ export default function StationStatusPage() {
             </tr>
           </thead>
           <tbody>
-            {sorted.map((s) => {
+            {sorted.slice(0, limit).map((s) => {
               const row = status[s.id]
               const last = row?.last ?? null
               const level = classify(last)
@@ -259,6 +318,15 @@ export default function StationStatusPage() {
           </tbody>
         </table>
       </div>
+
+      {sorted.length > limit && (
+        <button
+          onClick={() => setLimit((n) => n + 60)}
+          className="mt-3 w-full rounded-lg border border-slate-300 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          Ver más ({sorted.length - limit} restantes)
+        </button>
+      )}
 
       <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
         {snapshotDate

@@ -11,6 +11,7 @@ import {
 import 'leaflet/dist/leaflet.css'
 import { PageHeader, Card, Field, TextInput, Select, DataRow, Button } from '../components/ui'
 import { PlaceSearch } from '../components/PlaceSearch'
+import { LocateButton } from '../components/LocateButton'
 import { ACTIVE_STATIONS } from '../data/stations'
 import { nearestStations, type LatLon } from '../lib/geodesy'
 import { loadSnapshot, getCached } from '../lib/stationStatus'
@@ -118,88 +119,90 @@ export default function PlanningPage() {
         subtitle="Define el punto, la fecha y el orden objetivo; obtén las estaciones de apoyo, tiempos de ocupación y efemérides, y exporta el plan."
       />
 
-      <div className="grid gap-6 lg:grid-cols-[20rem_1fr] print:block">
-        <div className="space-y-4 print:hidden">
-          <Card>
-            <div className="space-y-3">
-              <Field label="Proyecto">
-                <TextInput value={projectName} onChange={(e) => setProjectName(e.target.value)} placeholder="Nombre del trabajo" />
-              </Field>
-              <div>
-                <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Punto</span>
-                <PlaceSearch onPick={(r) => setQueryPoint({ lat: r.lat, lon: r.lon, label: r.label })} />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <TextInput type="number" step="any" placeholder="lat" value={latIn} onChange={(e) => setLatIn(e.target.value)} />
-                <TextInput type="number" step="any" placeholder="lon" value={lonIn} onChange={(e) => setLonIn(e.target.value)} />
-              </div>
-              <Button variant="secondary" onClick={applyManual} className="w-full">
-                Usar coordenadas
-              </Button>
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[20rem_1fr] lg:items-start print:block">
+        {/* 1. Punto */}
+        <Card className="order-1 lg:col-start-1 lg:row-start-1 print:hidden">
+          <div className="space-y-3">
+            <Field label="Proyecto">
+              <TextInput value={projectName} onChange={(e) => setProjectName(e.target.value)} placeholder="Nombre del trabajo" />
+            </Field>
+            <div>
+              <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Punto</span>
+              <PlaceSearch onPick={(r) => setQueryPoint({ lat: r.lat, lon: r.lon, label: r.label })} />
             </div>
-          </Card>
-
-          <Card>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                <Field label="Fecha inicio"><TextInput type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
-                <Field label="Fecha fin"><TextInput type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} /></Field>
-              </div>
-              <Field label="Orden objetivo">
-                <Select value={order} onChange={(e) => setOrder(e.target.value as '2' | '3' | '4')}>
-                  <option value="2">Orden 2</option>
-                  <option value="3">Orden 3</option>
-                  <option value="4">Orden 4</option>
-                </Select>
-              </Field>
-              <Field label="Estaciones de apoyo">
-                <Select value={String(nStations)} onChange={(e) => setNStations(Number(e.target.value))}>
-                  {[2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
-                </Select>
-              </Field>
-              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-                <input type="checkbox" checked={excellent} onChange={(e) => setExcellent(e.target.checked)} className="size-4 accent-brand-600" />
-                Configuración excelente (3 min/km)
-              </label>
+            <LocateButton onLocate={(p) => setQueryPoint(p)} />
+            <div className="grid grid-cols-2 gap-2">
+              <TextInput type="number" step="any" inputMode="decimal" placeholder="lat" value={latIn} onChange={(e) => setLatIn(e.target.value)} />
+              <TextInput type="number" step="any" inputMode="decimal" placeholder="lon" value={lonIn} onChange={(e) => setLonIn(e.target.value)} />
             </div>
+            <Button variant="secondary" onClick={applyManual} className="w-full">
+              Usar coordenadas
+            </Button>
+          </div>
+        </Card>
+
+        {/* 3. Configuración de la sesión */}
+        <Card className="order-3 lg:col-start-1 lg:row-start-2 print:hidden">
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="Fecha inicio"><TextInput type="date" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
+              <Field label="Fecha fin"><TextInput type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} /></Field>
+            </div>
+            <Field label="Orden objetivo">
+              <Select value={order} onChange={(e) => setOrder(e.target.value as '2' | '3' | '4')}>
+                <option value="2">Orden 2</option>
+                <option value="3">Orden 3</option>
+                <option value="4">Orden 4</option>
+              </Select>
+            </Field>
+            <Field label="Estaciones de apoyo">
+              <Select value={String(nStations)} onChange={(e) => setNStations(Number(e.target.value))}>
+                {[2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
+              </Select>
+            </Field>
+            <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+              <input type="checkbox" checked={excellent} onChange={(e) => setExcellent(e.target.checked)} className="size-4 accent-brand-600" />
+              Configuración excelente (3 min/km)
+            </label>
+          </div>
+        </Card>
+
+        {/* 4. Estaciones candidatas */}
+        {candidates.length > 0 && (
+          <Card className="order-4 lg:col-start-1 lg:row-start-3 print:hidden">
+            <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Estaciones candidatas</p>
+            <ul className="space-y-1.5">
+              {candidates.map(({ station, distanceKm }) => {
+                const inPlan = selected.some((s) => s.station.id === station.id)
+                return (
+                  <li key={station.id} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={!excluded.has(station.id)}
+                      onChange={(e) =>
+                        setExcluded((prev) => {
+                          const next = new Set(prev)
+                          if (e.target.checked) next.delete(station.id)
+                          else next.add(station.id)
+                          return next
+                        })
+                      }
+                      className="size-4 accent-brand-600"
+                    />
+                    <span className={inPlan ? 'font-medium text-slate-900 dark:text-slate-100' : 'text-slate-500'}>
+                      {station.id}
+                    </span>
+                    <span className="tabular ml-auto text-slate-500">{distanceKm.toFixed(1)} km</span>
+                  </li>
+                )
+              })}
+            </ul>
           </Card>
+        )}
 
-          {candidates.length > 0 && (
-            <Card>
-              <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Estaciones candidatas</p>
-              <ul className="space-y-1.5">
-                {candidates.map(({ station, distanceKm }) => {
-                  const inPlan = selected.some((s) => s.station.id === station.id)
-                  return (
-                    <li key={station.id} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={!excluded.has(station.id)}
-                        onChange={(e) =>
-                          setExcluded((prev) => {
-                            const next = new Set(prev)
-                            if (e.target.checked) next.delete(station.id)
-                            else next.add(station.id)
-                            return next
-                          })
-                        }
-                        className="size-4 accent-brand-600"
-                      />
-                      <span className={inPlan ? 'font-medium text-slate-900 dark:text-slate-100' : 'text-slate-500'}>
-                        {station.id}
-                      </span>
-                      <span className="tabular ml-auto text-slate-500">{distanceKm.toFixed(1)} km</span>
-                    </li>
-                  )
-                })}
-              </ul>
-            </Card>
-          )}
-        </div>
-
-        <div>
-          <div className="mb-4 overflow-hidden rounded-xl border border-slate-200 print:hidden dark:border-slate-800">
-            <MapContainer center={COLOMBIA_CENTER} zoom={6} style={{ height: '20rem', width: '100%' }}>
+        {/* 2. Mapa */}
+        <div className="order-2 h-[52vh] min-h-72 overflow-hidden rounded-xl border border-slate-200 sm:h-96 lg:col-start-2 lg:row-span-3 lg:row-start-1 print:hidden dark:border-slate-800">
+          <MapContainer center={COLOMBIA_CENTER} zoom={6} style={{ height: '100%', width: '100%' }}>
               <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap" />
               <FitColombia />
               <FlyTo target={flyTarget} />
@@ -240,16 +243,18 @@ export default function PlanningPage() {
                 />
               )}
             </MapContainer>
-          </div>
+        </div>
 
+        {/* 5. Resultado */}
+        <div className="order-5 lg:col-start-2 lg:row-start-4 print:block">
           {!point && (
             <Card className="print:hidden">
               <p className="text-sm text-slate-500">
-                Toca el mapa, busca un lugar o ingresa coordenadas para generar el plan.
+                Toca el mapa, usa tu ubicación, busca un lugar o ingresa coordenadas
+                para generar el plan.
               </p>
             </Card>
           )}
-
           {plan && <PlanReport plan={plan} />}
         </div>
       </div>

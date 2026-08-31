@@ -11,6 +11,7 @@ import {
 import 'leaflet/dist/leaflet.css'
 import { PageHeader, Card, Field, TextInput, Select, Button } from '../components/ui'
 import { PlaceSearch } from '../components/PlaceSearch'
+import { LocateButton } from '../components/LocateButton'
 import { STATIONS, ACTIVE_STATIONS, type GnssStation } from '../data/stations'
 import { nearestStations, type LatLon } from '../lib/geodesy'
 import { project } from '../lib/coords'
@@ -69,13 +70,20 @@ export default function MapQueryPage() {
     [point],
   )
 
+  function setQuery(p: LatLon, label?: string) {
+    setPoint(p)
+    setFlyTarget({ ...p })
+    setPlace(label ? { ...p, label } : null)
+    setLatInput(p.lat.toFixed(6))
+    setLonInput(p.lon.toFixed(6))
+  }
+
   function applyManual() {
+    if (latInput.trim() === '' || lonInput.trim() === '') return
     const lat = Number(latInput)
     const lon = Number(lonInput)
-    if (Number.isFinite(lat) && Number.isFinite(lon)) {
-      const p = { lat, lon }
-      setPoint(p)
-      setFlyTarget({ ...p })
+    if (Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+      setQuery({ lat, lon })
     }
   }
 
@@ -87,19 +95,10 @@ export default function MapQueryPage() {
         subtitle="Busca un lugar, toca el mapa o ingresa coordenadas para ver las estaciones MAGNA-ECO más cercanas, con línea base geodésica y azimut."
       />
 
-      <div className="mb-4 max-w-xl">
-        <PlaceSearch
-          onPick={(r) => {
-            setPlace({ lat: r.lat, lon: r.lon, label: r.label })
-            setPoint({ lat: r.lat, lon: r.lon })
-            setFlyTarget({ lat: r.lat, lon: r.lon })
-          }}
-        />
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
-          <MapContainer center={COLOMBIA_CENTER} zoom={6} style={{ height: '32rem', width: '100%' }}>
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[1fr_20rem] lg:items-start">
+        {/* Mapa */}
+        <div className="order-2 h-[58vh] min-h-80 overflow-hidden rounded-xl border border-slate-200 sm:h-[32rem] lg:order-1 lg:row-span-3 dark:border-slate-800">
+          <MapContainer center={COLOMBIA_CENTER} zoom={6} style={{ height: '100%', width: '100%' }}>
             <LayersControl position="topright">
               <LayersControl.BaseLayer checked name="OpenStreetMap">
                 <TileLayer
@@ -125,7 +124,7 @@ export default function MapQueryPage() {
 
             <FitColombia />
             <FlyTo target={flyTarget} />
-            <ClickHandler onPick={setPoint} />
+            <ClickHandler onPick={(p) => setQuery(p)} />
 
             {visible.map((s) => (
               <CircleMarker
@@ -171,23 +170,31 @@ export default function MapQueryPage() {
           </MapContainer>
         </div>
 
-        <div className="space-y-4">
+        {/* Consulta: buscar lugar, mi ubicación, coordenadas */}
+        <div className="order-1 lg:order-2">
           <Card>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Latitud (°)">
-                <TextInput type="number" step="any" placeholder="4.65" value={latInput}
-                  onChange={(e) => setLatInput(e.target.value)} />
-              </Field>
-              <Field label="Longitud (°)">
-                <TextInput type="number" step="any" placeholder="-74.09" value={lonInput}
-                  onChange={(e) => setLonInput(e.target.value)} />
-              </Field>
+            <div className="space-y-3">
+              <PlaceSearch onPick={(r) => setQuery({ lat: r.lat, lon: r.lon }, r.label)} />
+              <LocateButton onLocate={(p) => setQuery(p)} />
+              <div className="grid grid-cols-2 gap-2">
+                <Field label="Latitud (°)">
+                  <TextInput type="number" step="any" inputMode="decimal" placeholder="4.65"
+                    value={latInput} onChange={(e) => setLatInput(e.target.value)} />
+                </Field>
+                <Field label="Longitud (°)">
+                  <TextInput type="number" step="any" inputMode="decimal" placeholder="-74.09"
+                    value={lonInput} onChange={(e) => setLonInput(e.target.value)} />
+                </Field>
+              </div>
+              <Button onClick={applyManual} className="w-full">
+                Consultar coordenadas
+              </Button>
             </div>
-            <Button onClick={applyManual} className="mt-3 w-full">
-              Consultar
-            </Button>
           </Card>
+        </div>
 
+        {/* Filtros */}
+        <div className="order-4 lg:order-4">
           <Card>
             <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">Filtros</p>
             <div className="space-y-2">
@@ -212,8 +219,11 @@ export default function MapQueryPage() {
               Mostrando {visible.length} de {STATIONS.length} estaciones.
             </p>
           </Card>
+        </div>
 
-          {point && (
+        {/* Resultados — justo después del mapa en móvil */}
+        {point && (
+          <div className="order-3 lg:order-3">
             <Card>
               <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-white">
                 Estaciones activas más cercanas
@@ -241,8 +251,8 @@ export default function MapQueryPage() {
                 orden superior. Distancias geodésicas (Karney, GRS80).
               </p>
             </Card>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
