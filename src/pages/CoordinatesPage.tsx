@@ -1,188 +1,41 @@
-import { useMemo, useState } from 'react'
-import { PageHeader, Card, Field, TextInput, Select, ExternalLink } from '../components/ui'
+import { useCallback, useState } from 'react'
+import { PageHeader, Card, ExternalLink } from '../components/ui'
+import { CoordinateEntry, type Geodetic } from '../components/CoordinateEntry'
 import {
   PROJECTED_CRS,
   project,
-  unproject,
   toGeocentric,
-  fromGeocentric,
   recommendedGkZone,
   recommendedUtmZone,
 } from '../lib/coords'
-import { dmsToDecimal } from '../lib/geodesy'
 import { formatDms } from '../lib/format'
 
-type InputKind = 'geo-dec' | 'geo-dms' | 'ecef' | string // string = PROJECTED_CRS code
-
-interface Geodetic {
-  lat: number
-  lon: number
-  h: number
-}
-
-const numsIn = (s: string) =>
-  (s.match(/-?\d+(?:[.,]\d+)?/g) ?? []).map((x) => Number(x.replace(',', '.')))
-
-/** [d, m, s] (con m/s opcionales) → grados decimales, aplicando el signo del hemisferio. */
-function toDeg(arr: number[], sign: 1 | -1): number | null {
-  if (arr.length === 0 || arr.some((n) => !Number.isFinite(n))) return null
-  const [d = 0, m = 0, s = 0] = arr.map(Math.abs)
-  return dmsToDecimal(d, m, s, sign)
-}
-
-/**
- * Extrae latitud y longitud de un texto en G° M' S" pegado. Acepta símbolos
- * (° ' "), comas decimales y los hemisferios N/S/E/W. Ejemplos válidos:
- *   4 35 46.3 N  74 04 39.0 W
- *   4°35'46.3"N, 74°04'39.0"W
- *   -4 35 46.3 ; -74 04 39.0
- */
-function parseDmsPair(text: string): { lat: number; lon: number } | null {
-  const t = text.trim()
-  if (!t) return null
-
-  const idxNS = t.search(/[NSns]/)
-  const idxEW = t.search(/[EWew]/)
-  if (idxNS >= 0 && idxEW > idxNS) {
-    const latH: 1 | -1 = t[idxNS].toUpperCase() === 'S' ? -1 : 1
-    const lonH: 1 | -1 = t[idxEW].toUpperCase() === 'W' ? -1 : 1
-    const lat = toDeg(numsIn(t.slice(0, idxNS)), latH)
-    const lon = toDeg(numsIn(t.slice(idxNS + 1, idxEW)), lonH)
-    if (lat != null && lon != null) return { lat, lon }
-    return null
-  }
-
-  // sin hemisferios: dos grupos separados por coma, punto y coma o salto de línea
-  const groups = t
-    .split(/[;,\n]/)
-    .map((g) => g.trim())
-    .filter(Boolean)
-  if (groups.length >= 2) {
-    const a = numsIn(groups[0])
-    const b = numsIn(groups[1])
-    const lat = toDeg(a, a[0] < 0 ? -1 : 1)
-    const lon = toDeg(b, b[0] < 0 ? -1 : 1)
-    if (lat != null && lon != null) return { lat, lon }
-  }
-  return null
-}
-
 export default function CoordinatesPage() {
-  const [kind, setKind] = useState<InputKind>('geo-dec')
-
-  // geográficas decimales / altura común
-  const [lat, setLat] = useState('4.596200')
-  const [lon, setLon] = useState('-74.077508')
-  const [h, setH] = useState('2550')
-  // GMS
-  const [dms, setDms] = useState('4 35 46.320 N  74 04 39.029 W')
-  // geocéntricas
-  const [x, setX] = useState('1744865.220')
-  const [y, setY] = useState('-6116283.189')
-  const [z, setZ] = useState('507891.840')
-  // proyectadas
-  const [easting, setEasting] = useState('4880524.169')
-  const [northing, setNorthing] = useState('2065965.397')
-
-  const geo: Geodetic | null = useMemo(() => {
-    const ht = Number(h) || 0
-    if (kind === 'geo-dec') {
-      const la = Number(lat)
-      const lo = Number(lon)
-      if (!Number.isFinite(la) || !Number.isFinite(lo) || Math.abs(la) > 90 || Math.abs(lo) > 180) return null
-      return { lat: la, lon: lo, h: ht }
-    }
-    if (kind === 'geo-dms') {
-      const p = parseDmsPair(dms)
-      return p ? { lat: p.lat, lon: p.lon, h: ht } : null
-    }
-    if (kind === 'ecef') {
-      const nx = Number(x)
-      const ny = Number(y)
-      const nz = Number(z)
-      if (![nx, ny, nz].every(Number.isFinite)) return null
-      const g = fromGeocentric(nx, ny, nz)
-      return { lat: g.lat, lon: g.lon, h: g.h }
-    }
-    // proyectada
-    const e = Number(easting)
-    const n = Number(northing)
-    if (!Number.isFinite(e) || !Number.isFinite(n)) return null
-    try {
-      const g = unproject(kind, e, n)
-      return { lat: g.lat, lon: g.lon, h: ht }
-    } catch {
-      return null
-    }
-  }, [kind, lat, lon, h, dms, x, y, z, easting, northing])
+  const [system, setSystem] = useState('geo-dms')
+  const [geo, setGeo] = useState<Geodetic | null>(null)
+  const onChange = useCallback((g: Geodetic | null) => setGeo(g), [])
 
   return (
     <div>
       <PageHeader
         title="Conversión de coordenadas"
-        subtitle={`Ingresa coordenadas en cualquier sistema (geográficas en grados o G° M' S", geocéntricas o planas) y obtén todas las representaciones.`}
+        subtitle={`Ingresa un punto en cualquier sistema (geográficas en grados o G° M' S", geocéntricas o planas) y obtén todas las representaciones.`}
       />
 
       <div className="grid gap-6 lg:grid-cols-[22rem_1fr]">
         <Card>
-          <div className="space-y-3">
-            <Field label="Sistema de entrada">
-              <Select value={kind} onChange={(e) => setKind(e.target.value)}>
-                <option value="geo-dec">Geográficas (grados decimales)</option>
-                <option value="geo-dms">Geográficas (G° M' S&quot;)</option>
-                <option value="ecef">Geocéntricas (X, Y, Z)</option>
-                {PROJECTED_CRS.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.label}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-
-            {kind === 'geo-dec' && (
-              <>
-                <Field label="Latitud (°)" hint="Positiva al norte.">
-                  <TextInput type="number" step="any" inputMode="decimal" value={lat} onChange={(e) => setLat(e.target.value)} />
-                </Field>
-                <Field label="Longitud (°)" hint="Negativa al oeste.">
-                  <TextInput type="number" step="any" inputMode="decimal" value={lon} onChange={(e) => setLon(e.target.value)} />
-                </Field>
-              </>
-            )}
-
-            {kind === 'geo-dms' && (
-              <Field
-                label={`Latitud y longitud en G° M' S"`}
-                hint={`Pega o escribe, p. ej. 4 35 46.3 N 74 04 39.0 W  (también acepta °, ' " y comas).`}
-              >
-                <TextInput value={dms} onChange={(e) => setDms(e.target.value)} placeholder={`4°35'46.3"N 74°04'39.0"W`} />
-              </Field>
-            )}
-
-            {kind === 'ecef' && (
-              <>
-                <Field label="X (m)"><TextInput type="number" step="any" inputMode="decimal" value={x} onChange={(e) => setX(e.target.value)} /></Field>
-                <Field label="Y (m)"><TextInput type="number" step="any" inputMode="decimal" value={y} onChange={(e) => setY(e.target.value)} /></Field>
-                <Field label="Z (m)"><TextInput type="number" step="any" inputMode="decimal" value={z} onChange={(e) => setZ(e.target.value)} /></Field>
-              </>
-            )}
-
-            {kind !== 'geo-dec' && kind !== 'geo-dms' && kind !== 'ecef' && (
-              <>
-                <Field label="Este / E (m)"><TextInput type="number" step="any" inputMode="decimal" value={easting} onChange={(e) => setEasting(e.target.value)} /></Field>
-                <Field label="Norte / N (m)"><TextInput type="number" step="any" inputMode="decimal" value={northing} onChange={(e) => setNorthing(e.target.value)} /></Field>
-              </>
-            )}
-
-            {kind !== 'ecef' && (
-              <Field label="Altura elipsoidal (m)" hint="Necesaria para las geocéntricas; si no la das se usa 0.">
-                <TextInput type="number" step="any" inputMode="decimal" value={h} onChange={(e) => setH(e.target.value)} />
-              </Field>
-            )}
-          </div>
+          <CoordinateEntry system={system} onSystemChange={setSystem} onChange={onChange} />
         </Card>
 
-        <div>{geo ? <Output geo={geo} /> : <Card><p className="text-sm text-slate-500">Ingresa coordenadas válidas.</p></Card>}</div>
+        <div>
+          {geo ? (
+            <Output geo={geo} />
+          ) : (
+            <Card>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Completa las coordenadas de entrada.</p>
+            </Card>
+          )}
+        </div>
       </div>
 
       <p className="mt-6 text-xs text-slate-500 dark:text-slate-400">

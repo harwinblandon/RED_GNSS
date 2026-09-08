@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { PageHeader, Card, Field, TextInput, Select, DataRow, ExternalLink, Button } from '../components/ui'
-import { parseCoordinates, type ParsedPoint } from '../lib/coordParse'
+import { CoordinateEntry, type Geodetic } from '../components/CoordinateEntry'
+import { parseCoordinates, type ParsedPoint, type ParseResult } from '../lib/coordParse'
 import { loadVemos, velocityAt, type VemosMeta, type Velocity } from '../lib/vemos'
 import { MAGNA_SIRGAS_EPOCH, propagate, decimalYear } from '../lib/epoch'
 import {
@@ -68,8 +69,13 @@ interface ResultRow {
 
 export default function EpochTransformPage() {
   const [meta, setMeta] = useState<VemosMeta | null>(null)
+  const [mode, setMode] = useState<'single' | 'batch'>('single')
   const [text, setText] = useState('')
   const [system, setSystem] = useState('auto')
+  const [entrySystem, setEntrySystem] = useState('geo-dms')
+  const [singleGeo, setSingleGeo] = useState<Geodetic | null>(null)
+  const [singleId, setSingleId] = useState('P1')
+  const onSingleGeo = useCallback((g: Geodetic | null) => setSingleGeo(g), [])
   const [fromStr, setFromStr] = useState(String(MAGNA_SIRGAS_EPOCH))
   const [toStr, setToStr] = useState(isoDate(new Date()))
   const [rows, setRows] = useState<ResultRow[] | null>(null)
@@ -84,7 +90,16 @@ export default function EpochTransformPage() {
   const fromEpoch = parseEpoch(fromStr)
   const toEpoch = parseEpoch(toStr)
 
-  const parsed = useMemo(() => parseCoordinates(text, system), [text, system])
+  const parsed = useMemo<ParseResult>(() => {
+    if (mode === 'batch') return parseCoordinates(text, system)
+    if (!singleGeo) return { points: [], errors: ['Completa las coordenadas.'] }
+    return {
+      points: [{ id: singleId.trim() || 'P1', lat: singleGeo.lat, lon: singleGeo.lon, h: singleGeo.h, kind: 'geo' }],
+      errors: [],
+    }
+  }, [mode, text, system, singleGeo, singleId])
+
+  const entradaLabel = systemLabel(mode === 'single' ? entrySystem : system)
 
   async function transform() {
     if (fromEpoch == null || toEpoch == null) {
@@ -115,7 +130,7 @@ export default function EpochTransformPage() {
         ctm12: project(pr.lat, pr.lon, 'EPSG:9377'),
         gk: { label: gk.label, easting: pGk.easting, northing: pGk.northing },
         utm: { label: utm.label.replace(' (GRS80)', ''), easting: pUtm.easting, northing: pUtm.northing },
-        entrada: systemLabel(system),
+        entrada: entradaLabel,
       })
     }
     setRows(out)
@@ -176,45 +191,74 @@ export default function EpochTransformPage() {
           </Card>
 
           <Card>
-            <div className="mb-3">
-              <Field label="Sistema de entrada">
-                <Select value={system} onChange={(e) => setSystem(e.target.value)}>
-                  <option value="auto">Auto (geográficas o geocéntricas)</option>
-                  <option value="geo-dec">Geográficas (grados decimales)</option>
-                  <option value="geo-dms">Geográficas (G° M' S&quot;)</option>
-                  <option value="ecef">Geocéntricas (X, Y, Z)</option>
-                  {PROJECTED_CRS.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.label}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
+            <div className="mb-4 grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1 text-sm dark:bg-slate-800">
+              {(['single', 'batch'] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMode(m)}
+                  className={`rounded-md px-3 py-1.5 font-medium transition ${
+                    mode === m
+                      ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-950 dark:text-white'
+                      : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                  }`}
+                >
+                  {m === 'single' ? 'Un punto' : 'Varios / archivo'}
+                </button>
+              ))}
             </div>
-            <Field label="Coordenadas" hint={hintFor(system)}>
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                rows={7}
-                placeholder={exampleFor(system)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+
+            {mode === 'single' ? (
+              <CoordinateEntry
+                system={entrySystem}
+                onSystemChange={setEntrySystem}
+                onChange={onSingleGeo}
+                idValue={singleId}
+                onIdChange={setSingleId}
               />
-            </Field>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <input ref={fileRef} type="file" accept=".csv,.txt" onChange={onFile} className="hidden" />
-              <Button variant="secondary" onClick={() => fileRef.current?.click()}>
-                Cargar CSV / TXT
-              </Button>
-              <Button variant="secondary" onClick={() => setText(exampleFor(system))}>
-                Ejemplo
-              </Button>
-            </div>
-            {text && (
-              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                {parsed.points.length} punto(s) leído(s)
-                {parsed.errors.length ? ` · ${parsed.errors.length} con problemas` : ''}
-              </p>
+            ) : (
+              <>
+                <div className="mb-3">
+                  <Field label="Sistema de entrada">
+                    <Select value={system} onChange={(e) => setSystem(e.target.value)}>
+                      <option value="auto">Auto (geográficas o geocéntricas)</option>
+                      <option value="geo-dec">Geográficas (grados decimales)</option>
+                      <option value="geo-dms">Geográficas (G° M' S&quot;)</option>
+                      <option value="ecef">Geocéntricas (X, Y, Z)</option>
+                      {PROJECTED_CRS.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                </div>
+                <Field label="Coordenadas" hint={hintFor(system)}>
+                  <textarea
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    rows={7}
+                    placeholder={exampleFor(system)}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                  />
+                </Field>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <input ref={fileRef} type="file" accept=".csv,.txt" onChange={onFile} className="hidden" />
+                  <Button variant="secondary" onClick={() => fileRef.current?.click()}>
+                    Cargar CSV / TXT
+                  </Button>
+                  <Button variant="secondary" onClick={() => setText(exampleFor(system))}>
+                    Ejemplo
+                  </Button>
+                </div>
+                {text && (
+                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                    {parsed.points.length} punto(s) leído(s)
+                    {parsed.errors.length ? ` · ${parsed.errors.length} con problemas` : ''}
+                  </p>
+                )}
+              </>
             )}
+
             <Button onClick={transform} disabled={busy || parsed.points.length === 0} className="mt-3 w-full">
               {busy ? 'Calculando…' : 'Transformar'}
             </Button>
