@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { NAV_ITEMS } from './navigation'
 import { useTheme } from './useTheme'
 import { MenuIcon, MoonIcon, SunIcon } from '../components/icons'
@@ -57,7 +57,9 @@ export default function Layout() {
             >
               <MenuIcon />
             </button>
-            <LogoFull className="h-9" />
+            <Link to="/" aria-label="Ir al inicio" onClick={() => setMobileOpen(false)}>
+              <LogoFull className="h-9" />
+            </Link>
           </div>
           <ThemeButton theme={theme} onToggle={toggle} />
         </header>
@@ -88,7 +90,13 @@ export default function Layout() {
 function Brand() {
   return (
     <div className="border-b border-slate-200 p-3 dark:border-[#2c2e32]">
-      <LogoFull className="w-full" />
+      <Link
+        to="/"
+        aria-label="Ir al inicio"
+        className="block rounded-md transition hover:opacity-80"
+      >
+        <LogoFull className="w-full" />
+      </Link>
     </div>
   )
 }
