@@ -85,6 +85,7 @@ export default function GpsCalendarPage() {
               />
               <DataRow label="Día del año (DOY)" value={String(info.dayOfYear).padStart(3, '0')} />
               <DataRow label="Año-DOY" value={`${info.year}-${String(info.dayOfYear).padStart(3, '0')}`} />
+              <DataRow label="Año decimal" value={info.decimalYear.toFixed(4)} />
               <DataRow label="Letra de sesión RINEX" value={info.sessionLetter} />
               <DataRow label="Fecha juliana (JD)" value={info.julianDate.toFixed(1)} />
               <DataRow label="Fecha juliana modificada (MJD)" value={info.modifiedJulianDate.toFixed(1)} />

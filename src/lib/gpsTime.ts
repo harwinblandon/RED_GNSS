@@ -26,6 +26,8 @@ export interface GpsTimeInfo {
   dayOfYear: number
   /** Año civil (UTC). */
   year: number
+  /** Año decimal (p. ej. 2006.542) — usado para épocas geodésicas. */
+  decimalYear: number
   /** Fecha juliana. */
   julianDate: number
   /** Fecha juliana modificada (MJD = JD − 2400000.5). */
@@ -52,6 +54,14 @@ export function dayOfYear(date: Date): number {
   return Math.floor((current - start) / MS_PER_DAY) + 1
 }
 
+/** Año decimal de un instante UTC (fracción según la posición dentro del año). */
+export function decimalYear(date: Date): number {
+  const y = date.getUTCFullYear()
+  const start = Date.UTC(y, 0, 1)
+  const end = Date.UTC(y + 1, 0, 1)
+  return y + (date.getTime() - start) / (end - start)
+}
+
 /** Letra de sesión RINEX (a=00h … x=23h UTC). */
 export function sessionLetter(hourUtc: number): string {
   if (!Number.isFinite(hourUtc)) return 'x'
@@ -76,7 +86,8 @@ export function gpsTimeFromDate(input: Date, opts?: { hourUtc?: number }): GpsTi
   const secondsOfWeek =
     dow * 86_400 + (typeof hour === 'number' ? Math.round(hour * 3600) : 0)
 
-  const jd = julianDateFromMs(midnightUtc)
+  const instantMs = midnightUtc + (typeof hour === 'number' ? hour * 3_600_000 : 0)
+  const jd = julianDateFromMs(instantMs)
   const date = new Date(midnightUtc)
 
   return {
@@ -87,6 +98,7 @@ export function gpsTimeFromDate(input: Date, opts?: { hourUtc?: number }): GpsTi
     secondsOfWeek,
     dayOfYear: dayOfYear(date),
     year,
+    decimalYear: decimalYear(new Date(instantMs)),
     julianDate: jd,
     modifiedJulianDate: jd - 2_400_000.5,
     sessionLetter: typeof hour === 'number' ? sessionLetter(hour) : 'x',

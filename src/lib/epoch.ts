@@ -8,6 +8,10 @@
  * conviene propagar la posición a esa época con la velocidad de la estación.
  */
 
+import { decimalYear } from './gpsTime'
+
+export { decimalYear }
+
 /** Época de referencia de las coordenadas oficiales MAGNA-SIRGAS. */
 export const MAGNA_SIRGAS_EPOCH = 2018.4
 
@@ -15,14 +19,6 @@ const A = 6378137.0
 const F = 1 / 298.257222101
 const E2 = F * (2 - F)
 const D2R = Math.PI / 180
-
-/** Año decimal de una fecha (UTC). */
-export function decimalYear(date: Date): number {
-  const y = date.getUTCFullYear()
-  const start = Date.UTC(y, 0, 1)
-  const end = Date.UTC(y + 1, 0, 1)
-  return y + (date.getTime() - start) / (end - start)
-}
 
 export interface PropagatedPoint {
   lat: number
