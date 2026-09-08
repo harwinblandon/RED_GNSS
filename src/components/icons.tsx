@@ -123,6 +123,13 @@ export const CrosshairIcon = (p: IconProps) => (
   </Base>
 )
 
+export const MarkerIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12Z" />
+    <circle cx="12" cy="9" r="2.5" />
+  </Base>
+)
+
 export const ClipboardIcon = (p: IconProps) => (
   <Base {...p}>
     <rect x="8" y="3" width="8" height="4" rx="1" />

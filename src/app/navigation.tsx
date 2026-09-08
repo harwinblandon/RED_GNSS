@@ -7,6 +7,7 @@ import {
   DownloadIcon,
   InfoIcon,
   MapIcon,
+  MarkerIcon,
   OrbitIcon,
   SatelliteIcon,
   SignalIcon,
@@ -42,6 +43,13 @@ export const NAV_ITEMS: NavItem[] = [
     description:
       'Identidad, coordenadas oficiales (época 2018.4 y propagadas), equipo, solución semanal descargable y enlaces a SIRGAS.',
     icon: SatelliteIcon,
+  },
+  {
+    path: '/red-pasiva',
+    label: 'Red pasiva',
+    description:
+      'Mojones y placas de control (órdenes 2, 3 y 4): ubícalos en el mapa por lugar o código y descarga su reseña (monografía).',
+    icon: MarkerIcon,
   },
   {
     path: '/rinex',

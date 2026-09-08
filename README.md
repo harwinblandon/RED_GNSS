@@ -15,6 +15,8 @@ ver `brand/` para usar el logotipo en mapa de bits.
 |---|---|
 | `/mapa` | Mapa con las estaciones MAGNA-ECO; búsqueda por lugar, clic o coordenadas → estaciones más cercanas (línea base y azimut geodésicos). Capas base OSM / satélite / relieve. |
 | `/planeacion` | Del punto y la fecha al plan completo: estaciones de apoyo, tiempos de ocupación, efemérides; exporta a PDF (impresión), CSV y KML. |
+| `/estacion` | Ficha por estación: coordenadas oficiales (2018.4 y propagadas), solución semanal descargable, equipo, enlaces SIRGAS. |
+| `/red-pasiva` | Mojones y placas de control (órdenes 2-4): mapa, búsqueda por lugar/código y descarga de la reseña (PDF). |
 | `/tiempos` | Tiempo mínimo de ocupación: modelo *Guía de alturas* (15 + 5·d) y rangos por orden de la *Resolución 1468 de 2021*. |
 | `/coordenadas` | Geográficas MAGNA-SIRGAS ↔ Origen Nacional CTM12, Gauss-Krüger (5 orígenes), UTM y geocéntricas. |
 | `/rinex` | Disponibilidad, latencia y descarga (ZIP) de archivos RINEX por estación — API del IGAC. |
@@ -64,6 +66,7 @@ src/
   pages/       una por ruta
 scripts/
   build-stations.py    regenera src/data/stations.ts
+  build-vertices.py    regenera public/vertices.json (red pasiva, ~10 k mojones)
   status-snapshot.py   regenera public/stations-status.json
 .github/workflows/
   stations-status.yml  corre status-snapshot.py a diario y hace commit
