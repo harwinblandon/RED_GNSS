@@ -83,7 +83,7 @@ export const NAV_ITEMS: NavItem[] = [
     path: '/coordenadas',
     label: 'Conversión de coordenadas',
     description:
-      'Geográficas MAGNA-SIRGAS ↔ Origen Nacional CTM12, Gauss-Krüger (5 orígenes), UTM y geocéntricas.',
+      'Pega coordenadas en cualquier sistema (geográficas en grados o G° M\' S", geocéntricas, CTM12, Gauss-Krüger o UTM) y obtén todas las representaciones.',
     icon: MapIcon,
   },
   {

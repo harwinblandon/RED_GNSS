@@ -18,7 +18,7 @@ ver `brand/` para usar el logotipo en mapa de bits.
 | `/estacion` | Ficha por estación: coordenadas oficiales (2018.4 y propagadas), solución semanal descargable, equipo, enlaces SIRGAS. |
 | `/red-pasiva` | Mojones y placas de control (órdenes 2-4): mapa, búsqueda por lugar/código y descarga de la reseña (PDF). |
 | `/tiempos` | Tiempo mínimo de ocupación: modelo *Guía de alturas* (15 + 5·d) y rangos por orden de la *Resolución 1468 de 2021*. |
-| `/coordenadas` | Geográficas MAGNA-SIRGAS ↔ Origen Nacional CTM12, Gauss-Krüger (5 orígenes), UTM y geocéntricas. |
+| `/coordenadas` | Entrada en cualquier sistema (geográficas en grados o G° M' S", geocéntricas X/Y/Z, CTM12, Gauss-Krüger, UTM) → todas las representaciones, con botón de copiar. |
 | `/epoca` | Transformación de coordenadas entre épocas con VEMOS2022 (SIRGAS); punto único o CSV/TXT → geográficas, geocéntricas y planas. |
 | `/rinex` | Disponibilidad, latencia y descarga (ZIP) de archivos RINEX por estación — API del IGAC. |
 | `/estado` | Semáforo de latencia de todas las estaciones; verificación por lote + snapshot diario. |
