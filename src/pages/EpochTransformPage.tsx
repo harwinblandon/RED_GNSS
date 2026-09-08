@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { PageHeader, Card, Field, TextInput, DataRow, ExternalLink, Button } from '../components/ui'
+import { PageHeader, Card, Field, TextInput, Select, DataRow, ExternalLink, Button } from '../components/ui'
 import { parseCoordinates, type ParsedPoint } from '../lib/coordParse'
 import { loadVemos, velocityAt, type VemosMeta, type Velocity } from '../lib/vemos'
 import { MAGNA_SIRGAS_EPOCH, propagate, decimalYear } from '../lib/epoch'
 import {
+  PROJECTED_CRS,
   project,
   toGeocentric,
   recommendedGkZone,
@@ -13,9 +14,36 @@ import { formatDms } from '../lib/format'
 import { downloadText } from '../lib/planning'
 import { isoDate } from '../lib/gpsTime'
 
-const EXAMPLE = `id,lat,lon,h
-P1,4.596200,-74.077508,2550
-P2,10.391335,-75.533853,4.06`
+/** Familia de entrada: los sistemas planos (EPSG:*, UTM*) comparten formato. */
+const familyOf = (s: string) =>
+  s === 'auto' || s === 'geo-dec' || s === 'geo-dms' || s === 'ecef' ? s : 'proj'
+
+const EXAMPLES: Record<string, string> = {
+  auto: `id,lat,lon,h\nP1,4.596200,-74.077508,2550\nP2,10.391335,-75.533853,4.06`,
+  'geo-dec': `id,lat,lon,h\nP1,4.596200,-74.077508,2550\nP2,10.391335,-75.533853,4.06`,
+  'geo-dms': `id, lat N/S  lon E/W  [h]\nP1, 4 35 46.3 N  74 04 39.0 W  2550\nP2, 10 23 28.8 N  75 32 01.9 W  4.06`,
+  ecef: `id,X,Y,Z\nP1,1744865.220,-6116283.189,507891.840`,
+  proj: `id,Este,Norte,h\nP1,4880524.169,2065965.397,2550`,
+}
+
+const HINTS: Record<string, string> = {
+  auto: 'Una por línea: [id,] lat, lon [, h]  ó  [id,] X, Y, Z. Separador coma, ; , tab o espacios.',
+  'geo-dec': 'Una por línea: [id,] latitud, longitud [, altura elipsoidal]. Longitud negativa al oeste.',
+  'geo-dms': `Una por línea: [id,] <lat> N/S  <lon> E/W  [altura]. Acepta ° ' " y comas.`,
+  ecef: 'Una por línea: [id,] X, Y, Z (metros).',
+  proj: 'Una por línea: [id,] Este, Norte [, altura elipsoidal] (metros).',
+}
+
+const exampleFor = (s: string) => EXAMPLES[familyOf(s)]
+const hintFor = (s: string) => HINTS[familyOf(s)]
+
+function systemLabel(s: string): string {
+  if (s === 'auto') return 'auto'
+  if (s === 'geo-dec') return 'geográficas (grados)'
+  if (s === 'geo-dms') return `geográficas (G° M' S")`
+  if (s === 'ecef') return 'geocéntricas'
+  return PROJECTED_CRS.find((c) => c.code === s)?.label ?? s
+}
 
 /** Acepta "2018.4" o "2018-05-26" → año decimal. */
 function parseEpoch(s: string): number | null {
@@ -35,11 +63,13 @@ interface ResultRow {
   ctm12: { easting: number; northing: number }
   gk: { label: string; easting: number; northing: number }
   utm: { label: string; easting: number; northing: number }
+  entrada: string
 }
 
 export default function EpochTransformPage() {
   const [meta, setMeta] = useState<VemosMeta | null>(null)
   const [text, setText] = useState('')
+  const [system, setSystem] = useState('auto')
   const [fromStr, setFromStr] = useState(String(MAGNA_SIRGAS_EPOCH))
   const [toStr, setToStr] = useState(isoDate(new Date()))
   const [rows, setRows] = useState<ResultRow[] | null>(null)
@@ -54,7 +84,7 @@ export default function EpochTransformPage() {
   const fromEpoch = parseEpoch(fromStr)
   const toEpoch = parseEpoch(toStr)
 
-  const parsed = useMemo(() => parseCoordinates(text), [text])
+  const parsed = useMemo(() => parseCoordinates(text, system), [text, system])
 
   async function transform() {
     if (fromEpoch == null || toEpoch == null) {
@@ -85,6 +115,7 @@ export default function EpochTransformPage() {
         ctm12: project(pr.lat, pr.lon, 'EPSG:9377'),
         gk: { label: gk.label, easting: pGk.easting, northing: pGk.northing },
         utm: { label: utm.label.replace(' (GRS80)', ''), easting: pUtm.easting, northing: pUtm.northing },
+        entrada: systemLabel(system),
       })
     }
     setRows(out)
@@ -145,15 +176,27 @@ export default function EpochTransformPage() {
           </Card>
 
           <Card>
-            <Field
-              label="Coordenadas"
-              hint="Una por línea: [id,] lat, lon [, h]  ó  [id,] X, Y, Z. Separador coma, ; , tab o espacios."
-            >
+            <div className="mb-3">
+              <Field label="Sistema de entrada">
+                <Select value={system} onChange={(e) => setSystem(e.target.value)}>
+                  <option value="auto">Auto (geográficas o geocéntricas)</option>
+                  <option value="geo-dec">Geográficas (grados decimales)</option>
+                  <option value="geo-dms">Geográficas (G° M' S&quot;)</option>
+                  <option value="ecef">Geocéntricas (X, Y, Z)</option>
+                  {PROJECTED_CRS.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.label}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            </div>
+            <Field label="Coordenadas" hint={hintFor(system)}>
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 rows={7}
-                placeholder={EXAMPLE}
+                placeholder={exampleFor(system)}
                 className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-xs text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
               />
             </Field>
@@ -162,7 +205,7 @@ export default function EpochTransformPage() {
               <Button variant="secondary" onClick={() => fileRef.current?.click()}>
                 Cargar CSV / TXT
               </Button>
-              <Button variant="secondary" onClick={() => setText(EXAMPLE)}>
+              <Button variant="secondary" onClick={() => setText(exampleFor(system))}>
                 Ejemplo
               </Button>
             </div>
@@ -233,9 +276,7 @@ function ResultCard({ r }: { r: ResultRow }) {
     <Card>
       <div className="flex items-baseline justify-between">
         <h3 className="font-semibold text-slate-900 dark:text-white">{r.point.id}</h3>
-        <span className="text-xs text-slate-500 dark:text-slate-400">
-          entrada: {r.point.kind === 'xyz' ? 'geocéntricas' : 'geográficas'}
-        </span>
+        <span className="text-xs text-slate-500 dark:text-slate-400">entrada: {r.entrada}</span>
       </div>
       <div className="mt-2">
         <DataRow label="Latitud" value={formatDms(r.lat, 'lat')} />
