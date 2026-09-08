@@ -14,6 +14,7 @@ import {
 import { formatDms } from '../lib/format'
 import { downloadText } from '../lib/planning'
 import { isoDate } from '../lib/gpsTime'
+import { buildEpochReport } from '../lib/epochReport'
 
 /** Familia de entrada: los sistemas planos (EPSG:*, UTM*) comparten formato. */
 const familyOf = (s: string) =>
@@ -60,10 +61,11 @@ interface ResultRow {
   lat: number
   lon: number
   h: number
+  shiftNEU: [number, number, number]
   xyz: { x: number; y: number; z: number }
   ctm12: { easting: number; northing: number }
-  gk: { label: string; easting: number; northing: number }
-  utm: { label: string; easting: number; northing: number }
+  gk: { code: string; label: string; easting: number; northing: number }
+  utm: { code: string; label: string; easting: number; northing: number }
   entrada: string
 }
 
@@ -79,6 +81,7 @@ export default function EpochTransformPage() {
   const [fromStr, setFromStr] = useState(String(MAGNA_SIRGAS_EPOCH))
   const [toStr, setToStr] = useState(isoDate(new Date()))
   const [rows, setRows] = useState<ResultRow[] | null>(null)
+  const [report, setReport] = useState<string | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -126,14 +129,38 @@ export default function EpochTransformPage() {
         lat: pr.lat,
         lon: pr.lon,
         h: pr.h,
+        shiftNEU: pr.shiftNEU,
         xyz: toGeocentric(pr.lat, pr.lon, pr.h),
         ctm12: project(pr.lat, pr.lon, 'EPSG:9377'),
-        gk: { label: gk.label, easting: pGk.easting, northing: pGk.northing },
-        utm: { label: utm.label.replace(' (GRS80)', ''), easting: pUtm.easting, northing: pUtm.northing },
+        gk: { code: gk.code, label: gk.label, easting: pGk.easting, northing: pGk.northing },
+        utm: { code: utm.code, label: utm.label.replace(' (GRS80)', ''), easting: pUtm.easting, northing: pUtm.northing },
         entrada: entradaLabel,
       })
     }
     setRows(out)
+    if (meta) {
+      setReport(
+        buildEpochReport({
+          meta,
+          fromEpoch,
+          toEpoch,
+          toInput: toStr,
+          generated: new Date(),
+          points: out.map((r) => ({
+            id: r.point.id,
+            entrada: r.entrada,
+            in: { lat: r.point.lat, lon: r.point.lon, h: r.point.h },
+            vel: r.vel,
+            shiftNEU: r.shiftNEU,
+            out: { lat: r.lat, lon: r.lon, h: r.h },
+            xyz: r.xyz,
+            ctm12: r.ctm12,
+            gk: r.gk,
+            utm: r.utm,
+          })),
+        }),
+      )
+    }
     setBusy(false)
     if (parsed.errors.length) setMsg(`${parsed.errors.length} fila(s) con problemas: ${parsed.errors[0]}`)
   }
@@ -269,10 +296,17 @@ export default function EpochTransformPage() {
               <h3 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-200">Modelo</h3>
               <DataRow label="Modelo" value={meta.model} />
               <DataRow label="Marco" value={meta.frame} />
-              <DataRow label="Intervalo" value={meta.timespan} />
+              <DataRow label="Intervalo de datos" value={meta.timespan} />
+              <DataRow label="Rejilla" value="1° × 1° · horizontal" />
               <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                Solo velocidades horizontales (vertical = 0). Rejilla 1°×1°, interpolación bilineal.{' '}
-                <ExternalLink href="https://sirgas.ipgh.org/en/products/vemos/">VEMOS (SIRGAS)</ExternalLink>.
+                {meta.citation}
+              </p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <ExternalLink href={meta.source}>Archivo VEMOS2022 (SIRGAS)</ExternalLink>
+              </p>
+              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                Al transformar se genera una <strong>memoria de cálculo</strong> con todo el
+                sustento para el informe.
               </p>
             </Card>
           )}
@@ -307,11 +341,56 @@ export default function EpochTransformPage() {
               <div className="space-y-4">
                 {rows.map((r) => <ResultCard key={r.point.id} r={r} />)}
               </div>
+
+              {report && <ReportPanel text={report} epoch={toEpoch} />}
             </>
           )}
         </div>
       </div>
     </div>
+  )
+}
+
+function ReportPanel({ text, epoch }: { text: string; epoch: number | null }) {
+  const [copied, setCopied] = useState(false)
+  function copy() {
+    navigator.clipboard?.writeText(text).then(
+      () => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 1500)
+      },
+      () => {},
+    )
+  }
+  return (
+    <Card className="mt-4">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="font-semibold text-slate-900 dark:text-white">
+          Memoria de cálculo (sustento del modelo)
+        </h3>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={copy}>
+            {copied ? '¡Copiado!' : 'Copiar'}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() =>
+              downloadText(`memoria_epoca_${epoch?.toFixed(2) ?? 'calc'}.txt`, text, 'text/plain')
+            }
+          >
+            Descargar .txt
+          </Button>
+        </div>
+      </div>
+      <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+        Texto listo para pegar en un informe: modelo VEMOS2022 y su cita, método de
+        propagación, épocas, nodos de la rejilla y pesos usados, velocidad, desplazamiento
+        y parámetros de cada proyección.
+      </p>
+      <pre className="max-h-96 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-[11px] leading-relaxed whitespace-pre text-slate-800 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200">
+        {text}
+      </pre>
+    </Card>
   )
 }
 

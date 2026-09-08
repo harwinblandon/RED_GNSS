@@ -12,8 +12,21 @@ export interface VemosMeta {
   model: string
   frame: string
   timespan: string
+  source: string
   citation: string
   generated: string
+}
+
+/** Nodo de la rejilla usado en el cálculo, con su peso en la interpolación. */
+export interface VelNode {
+  lat: number
+  lon: number
+  /** Velocidad Norte del nodo, mm/año (como en el archivo VEMOS). */
+  vnMm: number
+  /** Velocidad Este del nodo, mm/año. */
+  veMm: number
+  /** Peso en la combinación (bilineal: suman 1; nodo más cercano: 1). */
+  weight: number
 }
 
 export interface Velocity {
@@ -25,6 +38,10 @@ export interface Velocity {
   vu: 0
   /** `true` si el punto quedó fuera de la rejilla y se usó el nodo más cercano. */
   extrapolated: boolean
+  /** Cómo se obtuvo el valor. */
+  method: 'bilineal' | 'nodo-cercano'
+  /** Nodos de la rejilla que intervinieron (4 en bilineal, 1 en nodo más cercano). */
+  nodes: VelNode[]
 }
 
 type Node = [lat: number, lon: number, vnMm: number, veMm: number]
@@ -71,10 +88,26 @@ export async function velocityAt(lat: number, lon: number): Promise<Velocity> {
   if (c00 && c10 && c01 && c11) {
     const fy = lat - lat0
     const fx = lon - lon0
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t
-    const vn = lerp(lerp(c00[2], c01[2], fx), lerp(c10[2], c11[2], fx), fy) / 1000
-    const ve = lerp(lerp(c00[3], c01[3], fx), lerp(c10[3], c11[3], fx), fy) / 1000
-    return { vn, ve, vu: 0, extrapolated: false }
+    const w00 = (1 - fy) * (1 - fx)
+    const w01 = (1 - fy) * fx
+    const w10 = fy * (1 - fx)
+    const w11 = fy * fx
+    const asNode = (c: Node, weight: number): VelNode => ({
+      lat: c[0],
+      lon: c[1],
+      vnMm: c[2],
+      veMm: c[3],
+      weight,
+    })
+    const grid: VelNode[] = [
+      asNode(c00, w00),
+      asNode(c01, w01),
+      asNode(c10, w10),
+      asNode(c11, w11),
+    ]
+    const vn = grid.reduce((s, n) => s + n.vnMm * n.weight, 0) / 1000
+    const ve = grid.reduce((s, n) => s + n.veMm * n.weight, 0) / 1000
+    return { vn, ve, vu: 0, extrapolated: false, method: 'bilineal', nodes: grid }
   }
 
   // Fuera de la rejilla: nodo más cercano.
@@ -87,7 +120,10 @@ export async function velocityAt(lat: number, lon: number): Promise<Velocity> {
       best = n
     }
   }
+  const nearest: VelNode[] = best
+    ? [{ lat: best[0], lon: best[1], vnMm: best[2], veMm: best[3], weight: 1 }]
+    : []
   return best
-    ? { vn: best[2] / 1000, ve: best[3] / 1000, vu: 0, extrapolated: true }
-    : { vn: 0, ve: 0, vu: 0, extrapolated: true }
+    ? { vn: best[2] / 1000, ve: best[3] / 1000, vu: 0, extrapolated: true, method: 'nodo-cercano', nodes: nearest }
+    : { vn: 0, ve: 0, vu: 0, extrapolated: true, method: 'nodo-cercano', nodes: nearest }
 }
