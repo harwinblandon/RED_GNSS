@@ -12,7 +12,6 @@ import {
   SignalIcon,
 } from '../components/icons'
 
-
 export interface NavItem {
   path: string
   label: string
@@ -21,7 +20,15 @@ export interface NavItem {
   icon: ComponentType<SVGProps<SVGSVGElement>>
 }
 
+/** Ordenados según su papel en el flujo de post-proceso. */
 export const NAV_ITEMS: NavItem[] = [
+  {
+    path: '/planeacion',
+    label: 'Planeación de sesión',
+    description:
+      'Del punto y la fecha al plan completo: estaciones de apoyo, tiempos de ocupación, efemérides y exportables (PDF, CSV, KML).',
+    icon: ClipboardIcon,
+  },
   {
     path: '/mapa',
     label: 'Mapa de consulta',
@@ -33,22 +40,8 @@ export const NAV_ITEMS: NavItem[] = [
     path: '/estacion',
     label: 'Ficha de estación',
     description:
-      'Identidad, coordenadas oficiales (geo, geocéntricas y planas), equipo y enlaces a las soluciones SIRGAS e IGAC.',
+      'Identidad, coordenadas oficiales (época 2018.4 y propagadas), equipo, solución semanal descargable y enlaces a SIRGAS.',
     icon: SatelliteIcon,
-  },
-  {
-    path: '/planeacion',
-    label: 'Planeación de sesión',
-    description:
-      'Del punto y la fecha al plan completo: estaciones de apoyo, tiempos de ocupación, efemérides y exportables (PDF, CSV, KML).',
-    icon: ClipboardIcon,
-  },
-  {
-    path: '/tiempos',
-    label: 'Tiempo de ocupación',
-    description:
-      'Calcula el tiempo mínimo de rastreo estático: modelo de la Guía de alturas (15 + 5·d) y rangos por orden de la Resolución 1468 de 2021.',
-    icon: ClockIcon,
   },
   {
     path: '/rinex',
@@ -65,11 +58,18 @@ export const NAV_ITEMS: NavItem[] = [
     icon: SignalIcon,
   },
   {
-    path: '/calendario-gps',
-    label: 'Calendario GPS',
+    path: '/efemerides',
+    label: 'Efemérides',
     description:
-      'Convierte entre fecha civil, semana GPS, día de la semana, DOY, MJD y fecha juliana. Útil para nombrar archivos IGS/RINEX.',
-    icon: CalendarIcon,
+      'Enlaces a efemérides transmitidas y precisas (IGS/BKG/CDDIS/IGN) según la fecha, con nombre de archivo y espejos.',
+    icon: OrbitIcon,
+  },
+  {
+    path: '/tiempos',
+    label: 'Tiempo de ocupación',
+    description:
+      'Calcula el tiempo mínimo de rastreo estático: modelo de la Guía de alturas (15 + 5·d) y rangos por orden de la Resolución 1468 de 2021.',
+    icon: ClockIcon,
   },
   {
     path: '/coordenadas',
@@ -79,11 +79,11 @@ export const NAV_ITEMS: NavItem[] = [
     icon: MapIcon,
   },
   {
-    path: '/efemerides',
-    label: 'Efemérides',
+    path: '/calendario-gps',
+    label: 'Calendario GPS',
     description:
-      'Enlaces a efemérides transmitidas y precisas (IGS/BKG/CDDIS/IGN) según la fecha, con nombre de archivo y espejos.',
-    icon: OrbitIcon,
+      'Convierte entre fecha civil, semana GPS, día de la semana, DOY, MJD y fecha juliana. Útil para nombrar archivos IGS/RINEX.',
+    icon: CalendarIcon,
   },
   {
     path: '/acerca-de',

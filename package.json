@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
+    "fflate": "^0.8.3",
     "geographiclib-geodesic": "^2.2.0",
     "leaflet": "^1.9.4",
     "proj4": "^2.21.0",

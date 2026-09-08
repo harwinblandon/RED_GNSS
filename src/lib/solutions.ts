@@ -7,6 +7,7 @@
  * soluciones semanales del IGAC sí es consultable (CORS abierto), pero el
  * archivo `.CRD` no tiene descarga pública directa conocida.
  */
+import { unzipSync, strFromU8 } from 'fflate'
 import { dateFromGpsWeek, isoDate } from './gpsTime'
 
 /** Página de la estación en SIRGAS (coordenadas oficiales + serie temporal). */
@@ -65,4 +66,57 @@ export async function fetchIgacWeeklySolutions(signal?: AbortSignal): Promise<We
     })
     .filter((s) => Number.isFinite(s.gpsWeek))
     .sort((a, b) => b.gpsWeek - a.gpsWeek)
+}
+
+/* -------------- descarga y lectura de la solución semanal .CRD --------- */
+
+// El mismo endpoint que sirve los RINEX entrega los .CRD como ZIP.
+const RINEX_API = 'https://ccg.igac.gov.co/api/rinex'
+const IGA_WEEKLY_PREFIX = './CoordenadasSemanales/'
+
+/** Descarga el ZIP de una solución semanal del IGAC (contiene el archivo .CRD). */
+export async function downloadIgacWeeklyZip(name: string, signal?: AbortSignal): Promise<Blob> {
+  const res = await fetch(RINEX_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ datos: [IGA_WEEKLY_PREFIX + name] }),
+    signal,
+  })
+  if (!res.ok) throw new Error(`IGAC: HTTP ${res.status}`)
+  return res.blob()
+}
+
+export interface IgacWeeklyCoord {
+  /** Marco de referencia del archivo (p. ej. IGS20 ≈ ITRF2020). */
+  frame: string
+  /** Época del archivo (fecha-hora de observación). */
+  epoch: string
+  /** Coordenadas geocéntricas [X, Y, Z] en metros. */
+  xyz: [number, number, number]
+}
+
+/**
+ * Descarga la solución semanal, descomprime el `.CRD` y extrae la coordenada
+ * de una estación. Devuelve `null` si la estación no está en ese archivo
+ * (las estaciones SIRGAS-CON no se incluyen; su solución la publica SIRGAS).
+ */
+export async function fetchIgacWeeklyCoord(
+  name: string,
+  stationId: string,
+  signal?: AbortSignal,
+): Promise<IgacWeeklyCoord | null> {
+  const blob = await downloadIgacWeeklyZip(name, signal)
+  const files = unzipSync(new Uint8Array(await blob.arrayBuffer()))
+  const crd = Object.keys(files).find((f) => f.toUpperCase().endsWith('.CRD'))
+  if (!crd) return null
+  const text = strFromU8(files[crd])
+  const frame = text.match(/\b(IGS\d{2,}|ITRF\d{2,})\b/)?.[1] ?? '—'
+  const epoch = text.match(/POCA:\s*([\d:\- ]+)/)?.[1]?.trim() ?? '—'
+  for (const line of text.split(/\r?\n/)) {
+    const p = line.trim().split(/\s+/)
+    if (p.length >= 5 && p[1] === stationId && /^-?\d/.test(p[2])) {
+      return { frame, epoch, xyz: [Number(p[2]), Number(p[3]), Number(p[4])] }
+    }
+  }
+  return null
 }

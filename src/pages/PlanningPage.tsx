@@ -18,7 +18,11 @@ import { loadSnapshot, getCached } from '../lib/stationStatus'
 import { CAPTURE_PARAMS } from '../lib/igacNorms'
 import { formatMinutes } from '../lib/format'
 import { buildPlan, planToCsv, planToKml, downloadText } from '../lib/planning'
-import { sirgasStationUrl } from '../lib/solutions'
+import {
+  sirgasStationUrl,
+  fetchIgacWeeklySolutions,
+  downloadIgacWeeklyZip,
+} from '../lib/solutions'
 import { isoDate } from '../lib/gpsTime'
 import { COLOMBIA_CENTER, COLOMBIA_BOUNDS } from '../lib/colombia'
 
@@ -380,11 +384,51 @@ function PlanReport({ plan }: { plan: ReturnType<typeof buildPlan> }) {
             </li>
           ))}
         </ul>
+        <div className="mt-3">
+          <WeeklySolutionButton />
+        </div>
         <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
           En la Ficha están las coordenadas oficiales (época 2018.4 y propagadas a tu
           fecha) y los enlaces a las soluciones semanales SIRGAS/IGAC.
         </p>
       </Card>
     </div>
+  )
+}
+
+function WeeklySolutionButton() {
+  const [name, setName] = useState<string | null>(null)
+  const [downloading, setDownloading] = useState(false)
+
+  useEffect(() => {
+    const ctl = new AbortController()
+    fetchIgacWeeklySolutions(ctl.signal)
+      .then((l) => setName(l[0]?.name ?? null))
+      .catch(() => {})
+    return () => ctl.abort()
+  }, [])
+
+  async function download() {
+    if (!name) return
+    setDownloading(true)
+    try {
+      const blob = await downloadIgacWeeklyZip(name)
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `${name}.zip`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(a.href)
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  if (!name) return null
+  return (
+    <Button variant="secondary" onClick={download} disabled={downloading}>
+      {downloading ? 'Descargando…' : `Descargar solución semanal IGAC (${name})`}
+    </Button>
   )
 }

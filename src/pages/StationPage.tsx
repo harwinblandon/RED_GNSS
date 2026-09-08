@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { PageHeader, Card, DataRow, ExternalLink, Field, TextInput, Select } from '../components/ui'
+import { PageHeader, Card, DataRow, ExternalLink, Field, TextInput, Select, Button } from '../components/ui'
 import { StationPicker } from '../components/StationPicker'
 import { STATIONS, type GnssStation } from '../data/stations'
-import { project, recommendedGkZone, recommendedUtmZone } from '../lib/coords'
+import { project, recommendedGkZone, recommendedUtmZone, fromGeocentric } from '../lib/coords'
 import { formatDms } from '../lib/format'
 import { rinexDeepLink } from '../lib/rinex'
 import { getCached, loadSnapshot, classify, daysSince } from '../lib/stationStatus'
@@ -12,9 +12,11 @@ import { isoDate } from '../lib/gpsTime'
 import {
   sirgasStationUrl,
   SIRGAS_LINKS,
-  IGAC_LINKS,
   fetchIgacWeeklySolutions,
+  downloadIgacWeeklyZip,
+  fetchIgacWeeklyCoord,
   type WeeklySolution,
+  type IgacWeeklyCoord,
 } from '../lib/solutions'
 
 export default function StationPage() {
@@ -186,34 +188,116 @@ function StationDetail({ station: s }: { station: GnssStation }) {
         )}
       </Card>
 
-      <Card>
-        <h3 className="mb-1 font-semibold text-slate-900 dark:text-white">Soluciones semanales del IGAC</h3>
-        <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
-          Archivos <code>IGA&lt;semana&gt;.CRD</code> (formato Bernese) con las
-          coordenadas de toda la Red MAGNA-ECO por semana GPS.
-        </p>
-        {sol == null && <p className="text-sm text-slate-500">Consultando disponibilidad…</p>}
-        {sol?.error && (
-          <p className="text-sm text-rose-600 dark:text-rose-400">
-            No se pudo consultar el IGAC. {sol.error}
-          </p>
-        )}
-        {latest && (
-          <>
-            <DataRow label="Última publicada" value={`${latest.name} · semana GPS ${latest.gpsWeek}`} />
-            <DataRow label="Semana desde" value={latest.weekStart} />
-            <DataRow label="Publicada el" value={latest.published} />
-            <DataRow label="Semanas disponibles" value={`${sol!.list.length} (desde la ${sol!.list.at(-1)?.gpsWeek})`} />
-            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              El IGAC no publica descarga directa de los <code>.CRD</code>. Se solicitan en{' '}
-              <ExternalLink href={IGAC_LINKS.datosAbiertos}>Datos Abiertos — Geodesia</ExternalLink>{' '}
-              o a magnaeco@igac.gov.co. Las posiciones semanales de esta estación en el
-              marco SIRGAS sí están accesibles arriba (página de la estación en SIRGAS).
-            </p>
-          </>
-        )}
-      </Card>
+      <IgacWeeklyCard station={s} sol={sol} latest={latest} />
     </div>
+  )
+}
+
+function IgacWeeklyCard({
+  station: s,
+  sol,
+  latest,
+}: {
+  station: GnssStation
+  sol: { list: WeeklySolution[]; error: string | null } | null
+  latest: WeeklySolution | undefined
+}) {
+  const [coord, setCoord] = useState<
+    { state: 'loading' } | { state: 'ok'; data: IgacWeeklyCoord } | { state: 'absent' } | { state: 'error' }
+  >({ state: 'loading' })
+  const [downloading, setDownloading] = useState(false)
+
+  useEffect(() => {
+    if (!latest) return
+    const ctl = new AbortController()
+    setCoord({ state: 'loading' })
+    fetchIgacWeeklyCoord(latest.name, s.id, ctl.signal)
+      .then((c) => setCoord(c ? { state: 'ok', data: c } : { state: 'absent' }))
+      .catch(() => {
+        if (!ctl.signal.aborted) setCoord({ state: 'error' })
+      })
+    return () => ctl.abort()
+  }, [latest, s.id])
+
+  async function download() {
+    if (!latest) return
+    setDownloading(true)
+    try {
+      const blob = await downloadIgacWeeklyZip(latest.name)
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `${latest.name}.zip`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(a.href)
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  const geo = coord.state === 'ok' ? fromGeocentric(...coord.data.xyz) : null
+
+  return (
+    <Card>
+      <h3 className="mb-1 font-semibold text-slate-900 dark:text-white">Solución semanal del IGAC</h3>
+      <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+        Archivos <code>IGA&lt;semana&gt;.CRD</code> del centro de procesamiento IGA con
+        las coordenadas geocéntricas de las estaciones MAGNA-ECO <em>no incluidas en
+        SIRGAS-CON</em>, en el marco de la época de observación (IGS20 ≈ ITRF2020).
+        Las estaciones SIRGAS-CON tienen su solución semanal en SIRGAS (arriba).
+      </p>
+
+      {sol == null && <p className="text-sm text-slate-500">Consultando disponibilidad…</p>}
+      {sol?.error && (
+        <p className="text-sm text-rose-600 dark:text-rose-400">No se pudo consultar el IGAC. {sol.error}</p>
+      )}
+
+      {latest && (
+        <>
+          <DataRow label="Última publicada" value={`${latest.name} · semana GPS ${latest.gpsWeek}`} />
+          <DataRow label="Publicada el" value={latest.published} />
+          <DataRow label="Semanas disponibles" value={`${sol!.list.length} (desde la ${sol!.list.at(-1)?.gpsWeek})`} />
+
+          <div className="my-3">
+            <Button variant="secondary" onClick={download} disabled={downloading}>
+              {downloading ? 'Descargando…' : `Descargar ${latest.name} (ZIP)`}
+            </Button>
+          </div>
+
+          {coord.state === 'loading' && (
+            <p className="text-sm text-slate-500">Leyendo la coordenada de {s.id}…</p>
+          )}
+          {coord.state === 'absent' && (
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              {s.id} no está en este <code>.CRD</code> (probablemente es SIRGAS-CON — usa su
+              solución semanal de SIRGAS).
+            </p>
+          )}
+          {coord.state === 'error' && (
+            <p className="text-sm text-rose-600 dark:text-rose-400">No se pudo leer el archivo.</p>
+          )}
+          {coord.state === 'ok' && (
+            <>
+              <p className="mb-1 mt-1 text-sm font-medium text-slate-700 dark:text-slate-300">
+                Coordenada de {s.id} en {latest.name}
+              </p>
+              <DataRow label="Marco / época" value={`${coord.data.frame} · ${coord.data.epoch}`} />
+              <DataRow label="X" value={`${coord.data.xyz[0].toFixed(3)} m`} />
+              <DataRow label="Y" value={`${coord.data.xyz[1].toFixed(3)} m`} />
+              <DataRow label="Z" value={`${coord.data.xyz[2].toFixed(3)} m`} />
+              {geo && (
+                <>
+                  <DataRow label="Latitud" value={formatDms(geo.lat, 'lat')} />
+                  <DataRow label="Longitud" value={formatDms(geo.lon, 'lon')} />
+                  <DataRow label="Altura elipsoidal" value={`${geo.h.toFixed(3)} m`} />
+                </>
+              )}
+            </>
+          )}
+        </>
+      )}
+    </Card>
   )
 }
 
