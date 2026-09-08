@@ -240,11 +240,8 @@ export default function StationStatusPage() {
                   >
                     {row?.checking ? '…' : 'Verificar'}
                   </button>
-                  <a
-                    href={`#/rinex?station=${s.id}`}
-                    className="rounded border border-slate-300 px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
-                  >
-                    RINEX
+                  <a href={`#/estacion?station=${s.id}`} className="rounded border border-slate-300 px-2 py-1 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800">
+                    Ficha
                   </a>
                 </div>
               </div>
@@ -305,10 +302,10 @@ export default function StationStatusPage() {
                         {row?.checking ? '…' : 'Verificar'}
                       </button>
                       <a
-                        href={`#/rinex?station=${s.id}`}
+                        href={`#/estacion?station=${s.id}`}
                         className="rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
                       >
-                        RINEX
+                        Ficha
                       </a>
                     </div>
                   </td>

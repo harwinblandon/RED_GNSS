@@ -92,6 +92,12 @@ def build() -> str:
             print(f"  ! {s['identificador']}: sin coordenadas — omitida", file=sys.stderr)
             continue
         redes = [r.strip() for r in (fix(rec.get("redes")) or "").split(",") if r.strip()]
+
+        def num(key, nd):
+            v = rec.get(key)
+            return round(float(v), nd) if v not in (None, "", 0) else None
+
+        xyz = [rec.get(k) for k in ("x", "y", "z")]
         rows.append({
             "id": s["identificador"],
             "tId": tid,
@@ -101,8 +107,10 @@ def build() -> str:
             "domes": rec.get("numero_domo_iers"),
             "lat": round(float(lat), 7),
             "lon": round(float(lon), 7),
-            "heightM": round(float(rec["estacion_altura_elipsoidal"]), 3)
-            if rec.get("estacion_altura_elipsoidal") is not None else None,
+            "heightM": num("estacion_altura_elipsoidal", 3),
+            "xyz": [round(float(v), 4) for v in xyz] if all(v not in (None, "", 0) for v in xyz) else None,
+            "datum": str(rec.get("datum")) if rec.get("datum") else None,
+            "arpHeightM": num("altura_referencia_antena", 4),
             "order": int(s["orden"]),
             "status": "active" if s["estado"] == "Activa" else "inactive",
             "networks": redes,
@@ -128,14 +136,18 @@ def render(rows: list[dict]) -> str:
     def lit(r: dict) -> str:
         def s(v):
             return "null" if v is None else "'" + str(v).replace("\\", "\\\\").replace("'", "\\'") + "'"
-        nets = ", ".join("'" + n.replace("'", "\\'") + "'" for n in r["networks"])
+        def n(v):
+            return "null" if v is None else str(v)
+        nets = ", ".join("'" + x.replace("'", "\\'") + "'" for x in r["networks"])
+        xyz = "null" if r["xyz"] is None else "[" + ", ".join(str(v) for v in r["xyz"]) + "]"
         return (
             f"  {{ id: '{r['id']}', tId: {r['tId']}, name: {s(r['name'])}, "
             f"department: {s(r['department'])}, daneCode: {s(r['daneCode'])}, domes: {s(r['domes'])}, "
-            f"lat: {r['lat']}, lon: {r['lon']}, heightM: {r['heightM'] if r['heightM'] is not None else 'null'}, "
+            f"lat: {r['lat']}, lon: {r['lon']}, heightM: {n(r['heightM'])}, "
+            f"xyz: {xyz}, datum: {s(r['datum'])}, arpHeightM: {n(r['arpHeightM'])}, "
             f"order: {r['order']}, status: '{r['status']}', networks: [{nets}], "
             f"operator: {s(r['operator'])}, receiver: {s(r['receiver'])}, antenna: {s(r['antenna'])}, "
-            f"materialized: {s(r['materialized'])}, sampleRateS: {r['sampleRateS'] if r['sampleRateS'] is not None else 'null'} }},"
+            f"materialized: {s(r['materialized'])}, sampleRateS: {n(r['sampleRateS'])} }},"
         )
 
     body = "\n".join(lit(r) for r in rows)
@@ -170,6 +182,12 @@ export interface GnssStation {{
   lon: number
   /** Altura elipsoidal (m). */
   heightM: number | null
+  /** Coordenadas geocéntricas oficiales [X, Y, Z] en metros. */
+  xyz: [number, number, number] | null
+  /** Código EPSG del datum (4686 = MAGNA-SIRGAS). */
+  datum: string | null
+  /** Altura del punto de referencia de la antena (ARP), en metros. */
+  arpHeightM: number | null
   /** Orden geodésico oficial IGAC. */
   order: 0 | 1
   status: 'active' | 'inactive'

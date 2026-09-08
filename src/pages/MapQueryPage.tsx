@@ -322,8 +322,12 @@ function StationPopup({ s }: { s: GnssStation }) {
         </>
       )}
       <br />
+      <a href={`#/estacion?station=${s.id}`} style={{ color: '#2057d4', fontWeight: 600 }}>
+        Ficha de la estación →
+      </a>
+      <br />
       <a href={`#/rinex?station=${s.id}`} style={{ color: '#2057d4', fontWeight: 600 }}>
-        Ver / descargar RINEX →
+        Descargar RINEX →
       </a>
     </div>
   )

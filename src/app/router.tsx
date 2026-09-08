@@ -6,6 +6,7 @@ import HomePage from '../pages/HomePage'
 // Carga diferida: el mapa (Leaflet), la conversión (proj4) y el resto de
 // páginas se descargan solo cuando se visitan.
 const MapQueryPage = lazy(() => import('../pages/MapQueryPage'))
+const StationPage = lazy(() => import('../pages/StationPage'))
 const PlanningPage = lazy(() => import('../pages/PlanningPage'))
 const OccupationTimePage = lazy(() => import('../pages/OccupationTimePage'))
 const RinexAccessPage = lazy(() => import('../pages/RinexAccessPage'))
@@ -35,6 +36,7 @@ export const router = createHashRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: 'mapa', element: <Lazy><MapQueryPage /></Lazy> },
+      { path: 'estacion', element: <Lazy><StationPage /></Lazy> },
       { path: 'planeacion', element: <Lazy><PlanningPage /></Lazy> },
       { path: 'tiempos', element: <Lazy><OccupationTimePage /></Lazy> },
       { path: 'rinex', element: <Lazy><RinexAccessPage /></Lazy> },

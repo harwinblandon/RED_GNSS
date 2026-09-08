@@ -8,6 +8,7 @@ import {
   InfoIcon,
   MapIcon,
   OrbitIcon,
+  SatelliteIcon,
   SignalIcon,
 } from '../components/icons'
 
@@ -29,6 +30,14 @@ export const NAV_ITEMS: NavItem[] = [
     description:
       'Ubica un punto en el mapa o ingresa coordenadas y encuentra las estaciones MAGNA-ECO más cercanas con su línea base y azimut.',
     icon: CrosshairIcon,
+    status: 'beta',
+  },
+  {
+    path: '/estacion',
+    label: 'Ficha de estación',
+    description:
+      'Identidad, coordenadas oficiales (geo, geocéntricas y planas), equipo y enlaces a las soluciones SIRGAS e IGAC.',
+    icon: SatelliteIcon,
     status: 'beta',
   },
   {

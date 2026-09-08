@@ -126,7 +126,10 @@ export default function RinexAccessPage() {
                   {station.id} — {station.name}, {station.department}
                 </p>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Orden {station.order} · {station.id}00COL · id IGAC {station.tId}
+                  Orden {station.order} · {station.id}00COL ·{' '}
+                  <a href={`#/estacion?station=${station.id}`} className="font-medium text-brand-600 hover:underline dark:text-brand-400">
+                    ver ficha
+                  </a>
                 </p>
               </div>
               <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${FRESH_STYLE[fresh.level]}`}>
