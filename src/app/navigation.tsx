@@ -96,7 +96,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     path: '/acerca-de',
     label: 'Acerca de',
-    description: 'Fuentes normativas, alcance del proyecto y hoja de ruta.',
+    description: 'Fuentes de datos y normativas, créditos y aviso de uso.',
     icon: InfoIcon,
   },
 ]

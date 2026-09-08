@@ -39,13 +39,14 @@ export default function HomePage() {
           Herramientas para agilizar el trabajo de gabinete en posicionamiento GNSS
           estático diferencial contra la red de estaciones permanentes MAGNA-ECO del
           IGAC: planeación de tiempos de rastreo, búsqueda de estaciones de apoyo,
-          acceso a RINEX y efemérides, y utilidades de tiempo GPS.
+          acceso a RINEX y efemérides, red pasiva y utilidades de tiempo GPS.
         </p>
         <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
-          Todos los módulos están operativos (mapa con 208 estaciones activas del IGAC,
-          búsqueda por lugar, tiempos de ocupación, calendario GPS, conversión de
-          coordenadas, acceso a RINEX, estado de estaciones y efemérides). Se siguen
-          afinando y se irán agregando funciones.
+          Herramienta de apoyo con datos y servicios públicos de terceros. Ver{' '}
+          <a href="#/acerca-de" className="font-medium text-brand-600 hover:underline dark:text-brand-400">
+            Acerca de
+          </a>{' '}
+          para fuentes, créditos y aviso de uso.
         </p>
       </section>
     </div>
