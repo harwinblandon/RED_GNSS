@@ -138,7 +138,6 @@ export default function StationStatusPage() {
     <div>
       <PageHeader
         title="Estado de estaciones"
-        status="beta"
         subtitle="Qué tan recientes son los datos RINEX de cada estación. La fecha del último dato se consulta a la API del IGAC bajo demanda."
       />
 

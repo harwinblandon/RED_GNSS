@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { PageHeader, Card, DataRow, ExternalLink } from '../components/ui'
+import { PageHeader, Card, DataRow, ExternalLink, Field, TextInput, Select } from '../components/ui'
 import { StationPicker } from '../components/StationPicker'
 import { STATIONS, type GnssStation } from '../data/stations'
 import { project, recommendedGkZone, recommendedUtmZone } from '../lib/coords'
 import { formatDms } from '../lib/format'
 import { rinexDeepLink } from '../lib/rinex'
 import { getCached, loadSnapshot, classify, daysSince } from '../lib/stationStatus'
+import { MAGNA_SIRGAS_EPOCH, decimalYear, propagate } from '../lib/epoch'
+import { isoDate } from '../lib/gpsTime'
 import {
   sirgasStationUrl,
   SIRGAS_LINKS,
@@ -26,7 +28,6 @@ export default function StationPage() {
     <div>
       <PageHeader
         title="Ficha de estación"
-        status="beta"
         subtitle="Identidad, coordenadas oficiales, equipo y enlaces a las soluciones de coordenadas (SIRGAS e IGAC)."
       />
 
@@ -129,6 +130,8 @@ function StationDetail({ station: s }: { station: GnssStation }) {
         </p>
       </Card>
 
+      <EpochCard s={s} latestWeekStart={latest?.weekStart ?? null} />
+
       <Card>
         <h3 className="mb-3 font-semibold text-slate-900 dark:text-white">Equipo</h3>
         <DataRow label="Receptor" value={s.receiver ?? '—'} />
@@ -202,13 +205,82 @@ function StationDetail({ station: s }: { station: GnssStation }) {
             <DataRow label="Publicada el" value={latest.published} />
             <DataRow label="Semanas disponibles" value={`${sol!.list.length} (desde la ${sol!.list.at(-1)?.gpsWeek})`} />
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              El IGAC no ofrece descarga pública directa de los <code>.CRD</code>. Solicítalos en{' '}
+              El IGAC no publica descarga directa de los <code>.CRD</code>. Se solicitan en{' '}
               <ExternalLink href={IGAC_LINKS.datosAbiertos}>Datos Abiertos — Geodesia</ExternalLink>{' '}
-              o a magnaeco@igac.gov.co.
+              o a magnaeco@igac.gov.co. Las posiciones semanales de esta estación en el
+              marco SIRGAS sí están accesibles arriba (página de la estación en SIRGAS).
             </p>
           </>
         )}
       </Card>
     </div>
+  )
+}
+
+const TODAY = isoDate(new Date())
+
+function EpochCard({ s, latestWeekStart }: { s: GnssStation; latestWeekStart: string | null }) {
+  const [mode, setMode] = useState<'weekly' | 'today' | 'custom'>('weekly')
+  const [customDate, setCustomDate] = useState(TODAY)
+
+  if (!s.velNEU) {
+    return (
+      <Card>
+        <h3 className="mb-1 font-semibold text-slate-900 dark:text-white">Coordenadas en otra época</h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          No hay una velocidad conocida para esta estación (el NGL/MIDAS aún no la
+          publica). Consulta la solución multianual de SIRGAS para la velocidad
+          oficial y la posición en cualquier época.
+        </p>
+      </Card>
+    )
+  }
+
+  const targetDate =
+    mode === 'weekly' && latestWeekStart
+      ? latestWeekStart
+      : mode === 'custom'
+      ? customDate
+      : TODAY
+  const toEpoch = decimalYear(new Date(`${targetDate}T00:00:00Z`))
+  const p = propagate(s.lat, s.lon, s.heightM ?? 0, s.velNEU, MAGNA_SIRGAS_EPOCH, toEpoch)
+  const ctm = project(p.lat, p.lon, 'EPSG:9377')
+
+  return (
+    <Card>
+      <h3 className="mb-1 font-semibold text-slate-900 dark:text-white">Coordenadas en otra época</h3>
+      <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+        Posición propagada desde la época {MAGNA_SIRGAS_EPOCH} con la velocidad de la
+        estación. Velocidad {s.velNEU[0].toFixed(4)} N · {s.velNEU[1].toFixed(4)} E ·{' '}
+        {s.velNEU[2].toFixed(4)} A m/año (NGL/MIDAS, marco IGS14 — <strong>aproximada</strong>;
+        la oficial está en la solución multianual de SIRGAS).
+      </p>
+
+      <div className="mb-3 grid gap-2 sm:grid-cols-2">
+        <Field label="Época objetivo">
+          <Select value={mode} onChange={(e) => setMode(e.target.value as typeof mode)}>
+            <option value="weekly" disabled={!latestWeekStart}>
+              Última solución semanal IGAC{latestWeekStart ? ` (${latestWeekStart})` : ''}
+            </option>
+            <option value="today">Hoy</option>
+            <option value="custom">Fecha de medición…</option>
+          </Select>
+        </Field>
+        {mode === 'custom' && (
+          <Field label="Fecha">
+            <TextInput type="date" value={customDate} onChange={(e) => setCustomDate(e.target.value)} />
+          </Field>
+        )}
+      </div>
+
+      <DataRow label="Época" value={`${toEpoch.toFixed(3)} (${targetDate})`} />
+      <DataRow label="Δ desde 2018.4" value={`${p.years.toFixed(2)} años`} />
+      <DataRow label="Desplazamiento" value={`N ${p.shiftNEU[0] >= 0 ? '+' : ''}${(p.shiftNEU[0] * 100).toFixed(1)} · E ${p.shiftNEU[1] >= 0 ? '+' : ''}${(p.shiftNEU[1] * 100).toFixed(1)} · A ${p.shiftNEU[2] >= 0 ? '+' : ''}${(p.shiftNEU[2] * 100).toFixed(1)} cm`} />
+      <DataRow label="Latitud" value={formatDms(p.lat, 'lat')} />
+      <DataRow label="Longitud" value={formatDms(p.lon, 'lon')} />
+      <DataRow label="Lat / Lon (dec.)" value={`${p.lat.toFixed(8)} · ${p.lon.toFixed(8)}`} />
+      <DataRow label="Altura elipsoidal" value={`${p.h.toFixed(3)} m`} />
+      <DataRow label="CTM12" value={`${ctm.easting.toFixed(3)} E · ${ctm.northing.toFixed(3)} N`} />
+    </Card>
   )
 }

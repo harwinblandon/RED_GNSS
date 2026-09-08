@@ -22,7 +22,6 @@ export default function EphemeridesPage() {
     <div>
       <PageHeader
         title="Efemérides"
-        status="beta"
         subtitle="Enlaces a las efemérides transmitidas y precisas del IGS según la fecha del levantamiento, con el nombre de archivo y varios espejos de descarga."
       />
 

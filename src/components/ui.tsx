@@ -1,36 +1,14 @@
 import type { ReactNode } from 'react'
-import { STATUS_STYLES, type FeatureStatus } from '../app/navigation'
 import { ExternalIcon } from './icons'
 
-export function PageHeader({
-  title,
-  subtitle,
-  status,
-}: {
-  title: string
-  subtitle?: string
-  status?: FeatureStatus
-}) {
+export function PageHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <header className="mb-6 border-b border-slate-200 pb-4 dark:border-slate-800">
-      <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{title}</h1>
-        {status && <StatusBadge status={status} />}
-      </div>
+      <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{title}</h1>
       {subtitle && (
         <p className="mt-2 max-w-3xl text-sm text-slate-600 dark:text-slate-400">{subtitle}</p>
       )}
     </header>
-  )
-}
-
-export function StatusBadge({ status }: { status: FeatureStatus }) {
-  return (
-    <span
-      className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[status]}`}
-    >
-      {status}
-    </span>
   )
 }
 

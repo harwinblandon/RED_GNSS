@@ -99,7 +99,6 @@ export default function RinexAccessPage() {
     <div>
       <PageHeader
         title="Acceso a RINEX"
-        status="beta"
         subtitle="Consulta y descarga los archivos RINEX de las estaciones MAGNA-ECO. Datos servidos por la API del Centro de Control Geodésico del IGAC."
       />
 

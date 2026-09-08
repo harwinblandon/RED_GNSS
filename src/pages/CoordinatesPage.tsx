@@ -16,7 +16,6 @@ export default function CoordinatesPage() {
     <div>
       <PageHeader
         title="Conversión de coordenadas"
-        status="beta"
         subtitle="Entre coordenadas geográficas MAGNA-SIRGAS y los sistemas planos usados en Colombia: Origen Nacional CTM12, Gauss-Krüger (5 orígenes), UTM y geocéntricas."
       />
 

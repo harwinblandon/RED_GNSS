@@ -4,14 +4,13 @@ import { NAV_ITEMS } from './navigation'
 import { useTheme } from './useTheme'
 import { MenuIcon, MoonIcon, SunIcon } from '../components/icons'
 import { LogoFull } from '../components/Logo'
-import { StatusBadge } from '../components/ui'
 import { useAuth } from './auth'
 import { authEnabled } from '../lib/supabase'
 
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <nav className="space-y-1">
-      {NAV_ITEMS.map(({ path, label, icon: Icon, status }) => (
+      {NAV_ITEMS.map(({ path, label, icon: Icon }) => (
         <NavLink
           key={path}
           to={path}
@@ -24,13 +23,8 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
             }`
           }
         >
-          {({ isActive }) => (
-            <>
-              <Icon width={18} height={18} />
-              <span className="flex-1">{label}</span>
-              {status !== 'listo' && !isActive && <StatusBadge status={status} />}
-            </>
-          )}
+          <Icon width={18} height={18} />
+          <span className="flex-1">{label}</span>
         </NavLink>
       ))}
     </nav>

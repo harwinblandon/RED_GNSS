@@ -17,7 +17,6 @@ export default function OccupationTimePage() {
     <div>
       <PageHeader
         title="Tiempo de ocupación"
-        status="beta"
         subtitle="Dos marcos normativos del IGAC para planear el tiempo mínimo de rastreo en estático diferencial. Elige el que corresponda al objetivo del levantamiento."
       />
 

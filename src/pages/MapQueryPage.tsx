@@ -91,7 +91,6 @@ export default function MapQueryPage() {
     <div>
       <PageHeader
         title="Mapa de consulta"
-        status="beta"
         subtitle="Busca un lugar, toca el mapa o ingresa coordenadas para ver las estaciones MAGNA-ECO más cercanas, con línea base geodésica y azimut."
       />
 

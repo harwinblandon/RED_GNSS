@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { NAV_ITEMS } from '../app/navigation'
-import { StatusBadge } from '../components/ui'
 
 export default function HomePage() {
   const features = NAV_ITEMS.filter((i) => i.path !== '/acerca-de')
@@ -12,7 +11,7 @@ export default function HomePage() {
       </h1>
 
       <section className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-        {features.map(({ path, label, description, icon: Icon, status }) => (
+        {features.map(({ path, label, description, icon: Icon }) => (
           <Link
             key={path}
             to={path}
@@ -23,7 +22,6 @@ export default function HomePage() {
                 <Icon width={18} height={18} />
               </span>
               <h2 className="flex-1 font-semibold text-slate-900 dark:text-white">{label}</h2>
-              <StatusBadge status={status} />
             </div>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{description}</p>
           </Link>

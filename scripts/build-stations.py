@@ -19,6 +19,33 @@ API = "https://ccg.igac.gov.co/api"
 OUT = "src/data/stations.ts"
 CACHE = "scripts/.cache"
 UA = {"User-Agent": "build-stations.py (proyecto GNSS-IGAC)"}
+# Velocidades MIDAS del Nevada Geodetic Laboratory (marco IGS14 ≈ ITRF2014).
+NGL_MIDAS = "https://geodesy.unr.edu/velocities/midas.IGS14.txt"
+
+
+def load_velocities() -> dict:
+    """{id4: (vn, ve, vu)} en m/año, solo estaciones dentro del recuadro de Colombia."""
+    try:
+        req = urllib.request.Request(NGL_MIDAS, headers=UA)
+        text = urllib.request.urlopen(req, timeout=90).read().decode("utf-8", "replace")
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! sin velocidades NGL: {e}", file=sys.stderr)
+        return {}
+    out = {}
+    for line in text.splitlines():
+        p = line.split()
+        if len(p) < 26:
+            continue
+        try:
+            ve, vn, vu = float(p[8]), float(p[9]), float(p[10])
+            reflat, reflon = float(p[-3]), float(p[-2])
+        except ValueError:
+            continue
+        if reflon > 180:
+            reflon -= 360
+        if -4.5 <= reflat <= 13.6 and -80 <= reflon <= -66:
+            out[p[0]] = (vn, ve, vu, reflat, reflon)
+    return out
 
 
 def get_json(path: str, timeout: int = 40, cache: bool = True):
@@ -77,8 +104,12 @@ def build() -> str:
         if s.get("estado") in ("Activa", "Inactiva") and s["identificador"] not in EXCLUDE
     ]
     print(f"  {len(lst)} estaciones (activas + inactivas)")
+    print("· velocidades NGL/MIDAS…")
+    vel = load_velocities()
+    print(f"  {len(vel)} estaciones con velocidad en el recuadro de Colombia")
 
     rows = []
+    matched_vel = 0
     for i, s in enumerate(lst, 1):
         tid = s["t_id"]
         try:
@@ -98,6 +129,16 @@ def build() -> str:
             return round(float(v), nd) if v not in (None, "", 0) else None
 
         xyz = [rec.get(k) for k in ("x", "y", "z")]
+
+        # Velocidad: emparejar por id de 4 letras y confirmar por cercanía (<0.1°).
+        vel_neu = None
+        v = vel.get(s["identificador"])
+        if v:
+            vn, ve, vu, rlat, rlon = v
+            if abs(rlat - float(lat)) < 0.1 and abs(rlon - float(lon)) < 0.1:
+                vel_neu = [round(vn, 5), round(ve, 5), round(vu, 5)]
+                matched_vel += 1
+
         rows.append({
             "id": s["identificador"],
             "tId": tid,
@@ -119,11 +160,13 @@ def build() -> str:
             "antenna": fix(rec.get("antena_modelo") or "") or None,
             "materialized": rec.get("fecha_materializacion"),
             "sampleRateS": rec.get("tasa_muestreo"),
+            "velNEU": vel_neu,
         })
         if i % 40 == 0:
             print(f"  … {i}/{len(lst)}")
         time.sleep(0.1)
 
+    print(f"  {matched_vel} estaciones con velocidad emparejada")
     rows.sort(key=lambda r: r["id"])
     return render(rows)
 
@@ -139,12 +182,13 @@ def render(rows: list[dict]) -> str:
         def n(v):
             return "null" if v is None else str(v)
         nets = ", ".join("'" + x.replace("'", "\\'") + "'" for x in r["networks"])
-        xyz = "null" if r["xyz"] is None else "[" + ", ".join(str(v) for v in r["xyz"]) + "]"
+        arr = lambda a: "null" if a is None else "[" + ", ".join(str(v) for v in a) + "]"
         return (
             f"  {{ id: '{r['id']}', tId: {r['tId']}, name: {s(r['name'])}, "
             f"department: {s(r['department'])}, daneCode: {s(r['daneCode'])}, domes: {s(r['domes'])}, "
             f"lat: {r['lat']}, lon: {r['lon']}, heightM: {n(r['heightM'])}, "
-            f"xyz: {xyz}, datum: {s(r['datum'])}, arpHeightM: {n(r['arpHeightM'])}, "
+            f"xyz: {arr(r['xyz'])}, datum: {s(r['datum'])}, arpHeightM: {n(r['arpHeightM'])}, "
+            f"velNEU: {arr(r['velNEU'])}, "
             f"order: {r['order']}, status: '{r['status']}', networks: [{nets}], "
             f"operator: {s(r['operator'])}, receiver: {s(r['receiver'])}, antenna: {s(r['antenna'])}, "
             f"materialized: {s(r['materialized'])}, sampleRateS: {n(r['sampleRateS'])} }},"
@@ -188,6 +232,12 @@ export interface GnssStation {{
   datum: string | null
   /** Altura del punto de referencia de la antena (ARP), en metros. */
   arpHeightM: number | null
+  /**
+   * Velocidad [Norte, Este, Arriba] en m/año, marco IGS14 (≈ ITRF2014).
+   * Fuente: MIDAS del Nevada Geodetic Laboratory — aproximada; la oficial
+   * está en la solución multianual de SIRGAS.
+   */
+  velNEU: [number, number, number] | null
   /** Orden geodésico oficial IGAC. */
   order: 0 | 1
   status: 'active' | 'inactive'

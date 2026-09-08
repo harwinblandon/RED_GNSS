@@ -17,6 +17,7 @@ export function sirgasStationUrl(id: string): string {
 export const SIRGAS_LINKS = {
   coordinates: 'https://sirgas.ipgh.org/en/gnss-network/coordinates/',
   weekly: 'https://sirgas.ipgh.org/en/gnss-network/coordinates/loosely-constrained-weekly-solutions/',
+  weeklyPositions: 'https://sirgas.ipgh.org/en/gnss-network/coordinates/weekly-positions/',
   multiYear: 'https://sirgas.ipgh.org/en/gnss-network/coordinates/multi-year-solutions/',
   ftp: 'https://ftp.sirgas.org/pub/gps/SIRGAS/',
 } as const

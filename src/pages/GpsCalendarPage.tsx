@@ -29,7 +29,6 @@ export default function GpsCalendarPage() {
     <div>
       <PageHeader
         title="Calendario GPS"
-        status="listo"
         subtitle="Conversión entre fecha civil (UTC) y tiempo GPS: semana GPS, día de la semana, DOY, MJD y fecha juliana. Los nombres de archivos IGS/RINEX se construyen con estos valores."
       />
 

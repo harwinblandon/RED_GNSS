@@ -18,6 +18,7 @@ import { loadSnapshot, getCached } from '../lib/stationStatus'
 import { CAPTURE_PARAMS } from '../lib/igacNorms'
 import { formatMinutes } from '../lib/format'
 import { buildPlan, planToCsv, planToKml, downloadText } from '../lib/planning'
+import { sirgasStationUrl } from '../lib/solutions'
 import { isoDate } from '../lib/gpsTime'
 import { COLOMBIA_CENTER, COLOMBIA_BOUNDS } from '../lib/colombia'
 
@@ -115,7 +116,6 @@ export default function PlanningPage() {
     <div>
       <PageHeader
         title="Planeación de sesión"
-        status="beta"
         subtitle="Define el punto, la fecha y el orden objetivo; obtén las estaciones de apoyo, tiempos de ocupación y efemérides, y exporta el plan."
       />
 
@@ -356,17 +356,34 @@ function PlanReport({ plan }: { plan: ReturnType<typeof buildPlan> }) {
       </Card>
 
       <Card className="print:hidden">
-        <h3 className="mb-2 font-semibold text-slate-900 dark:text-white">RINEX de las estaciones</h3>
-        <ul className="space-y-1 text-sm">
+        <h3 className="mb-2 font-semibold text-slate-900 dark:text-white">
+          Datos y soluciones de las estaciones
+        </h3>
+        <ul className="divide-y divide-slate-100 text-sm dark:divide-slate-800">
           {plan.stations.map((s) => (
-            <li key={s.station.id}>
-              <a href={`#/rinex?station=${s.station.id}`} className="font-medium text-brand-600 hover:underline dark:text-brand-400">
-                {s.station.id}
+            <li key={s.station.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
+              <span className="font-medium text-slate-900 dark:text-slate-100">{s.station.id}</span>
+              <a href={`#/rinex?station=${s.station.id}`} className="text-brand-600 hover:underline dark:text-brand-400">
+                RINEX
               </a>
-              <span className="text-slate-500"> — descargar RINEX</span>
+              <a href={`#/estacion?station=${s.station.id}`} className="text-brand-600 hover:underline dark:text-brand-400">
+                Ficha · coordenadas
+              </a>
+              <a
+                href={sirgasStationUrl(s.station.id)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-600 hover:underline dark:text-brand-400"
+              >
+                SIRGAS ↗
+              </a>
             </li>
           ))}
         </ul>
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          En la Ficha están las coordenadas oficiales (época 2018.4 y propagadas a tu
+          fecha) y los enlaces a las soluciones semanales SIRGAS/IGAC.
+        </p>
       </Card>
     </div>
   )
