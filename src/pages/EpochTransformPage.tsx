@@ -39,6 +39,40 @@ const HINTS: Record<string, string> = {
 const exampleFor = (s: string) => EXAMPLES[familyOf(s)]
 const hintFor = (s: string) => HINTS[familyOf(s)]
 
+interface QueueItem {
+  id: string
+  lat: number
+  lon: number
+  h: number
+  entrada: string
+}
+
+const QUEUE_KEY = 'htopo.epoca.lista'
+
+function loadQueue(): QueueItem[] {
+  try {
+    const raw = localStorage.getItem(QUEUE_KEY)
+    const arr = raw ? JSON.parse(raw) : []
+    return Array.isArray(arr) ? arr.filter((x) => Number.isFinite(x?.lat) && Number.isFinite(x?.lon)) : []
+  } catch {
+    return []
+  }
+}
+
+function saveQueue(q: QueueItem[]) {
+  try {
+    localStorage.setItem(QUEUE_KEY, JSON.stringify(q))
+  } catch {
+    /* almacenamiento no disponible */
+  }
+}
+
+/** Incrementa el sufijo numérico de un identificador ("P1" → "P2"). */
+function nextId(id: string, fallbackIndex: number): string {
+  const m = id.match(/^(.*?)(\d+)\s*$/)
+  return m ? `${m[1]}${Number(m[2]) + 1}` : `P${fallbackIndex + 1}`
+}
+
 function systemLabel(s: string): string {
   if (s === 'auto') return 'auto'
   if (s === 'geo-dec') return 'geográficas (grados)'
@@ -76,7 +110,10 @@ export default function EpochTransformPage() {
   const [system, setSystem] = useState('auto')
   const [entrySystem, setEntrySystem] = useState('geo-dms')
   const [singleGeo, setSingleGeo] = useState<Geodetic | null>(null)
-  const [singleId, setSingleId] = useState('P1')
+  const [queue, setQueue] = useState<QueueItem[]>(() => loadQueue())
+  const [singleId, setSingleId] = useState(() =>
+    queue.length ? nextId(queue[queue.length - 1].id, queue.length) : 'P1',
+  )
   const onSingleGeo = useCallback((g: Geodetic | null) => setSingleGeo(g), [])
   const [fromStr, setFromStr] = useState(String(MAGNA_SIRGAS_EPOCH))
   const [toStr, setToStr] = useState(isoDate(new Date()))
@@ -93,16 +130,58 @@ export default function EpochTransformPage() {
   const fromEpoch = parseEpoch(fromStr)
   const toEpoch = parseEpoch(toStr)
 
+  /** Puntos del modo manual: la lista guardada + el punto en edición (si es válido y su id no está ya). */
+  const { singlePoints, entradaById } = useMemo(() => {
+    const points: ParsedPoint[] = []
+    const map = new Map<string, string>()
+    for (const it of queue) {
+      points.push({ id: it.id, lat: it.lat, lon: it.lon, h: it.h, kind: 'geo' })
+      map.set(it.id, it.entrada)
+    }
+    if (singleGeo) {
+      const id = singleId.trim() || `P${points.length + 1}`
+      if (!map.has(id)) {
+        points.push({ id, lat: singleGeo.lat, lon: singleGeo.lon, h: singleGeo.h, kind: 'geo' })
+        map.set(id, systemLabel(entrySystem))
+      }
+    }
+    return { singlePoints: points, entradaById: map }
+  }, [queue, singleGeo, singleId, entrySystem])
+
   const parsed = useMemo<ParseResult>(() => {
     if (mode === 'batch') return parseCoordinates(text, system)
-    if (!singleGeo) return { points: [], errors: ['Completa las coordenadas.'] }
-    return {
-      points: [{ id: singleId.trim() || 'P1', lat: singleGeo.lat, lon: singleGeo.lon, h: singleGeo.h, kind: 'geo' }],
-      errors: [],
-    }
-  }, [mode, text, system, singleGeo, singleId])
+    if (singlePoints.length === 0) return { points: [], errors: ['Completa las coordenadas.'] }
+    return { points: singlePoints, errors: [] }
+  }, [mode, text, system, singlePoints])
 
   const entradaLabel = systemLabel(mode === 'single' ? entrySystem : system)
+
+  function addToQueue() {
+    if (!singleGeo) {
+      setMsg('Completa el punto antes de agregarlo a la lista.')
+      return
+    }
+    const id = singleId.trim() || `P${queue.length + 1}`
+    const next = [
+      ...queue.filter((q) => q.id !== id),
+      { id, lat: singleGeo.lat, lon: singleGeo.lon, h: singleGeo.h, entrada: systemLabel(entrySystem) },
+    ]
+    setQueue(next)
+    saveQueue(next)
+    setSingleId(nextId(id, next.length))
+    setMsg(null)
+  }
+
+  function removeFromQueue(id: string) {
+    const next = queue.filter((q) => q.id !== id)
+    setQueue(next)
+    saveQueue(next)
+  }
+
+  function clearQueue() {
+    setQueue([])
+    saveQueue([])
+  }
 
   async function transform() {
     if (fromEpoch == null || toEpoch == null) {
@@ -134,7 +213,7 @@ export default function EpochTransformPage() {
         ctm12: project(pr.lat, pr.lon, 'EPSG:9377'),
         gk: { code: gk.code, label: gk.label, easting: pGk.easting, northing: pGk.northing },
         utm: { code: utm.code, label: utm.label.replace(' (GRS80)', ''), easting: pUtm.easting, northing: pUtm.northing },
-        entrada: entradaLabel,
+        entrada: mode === 'single' ? entradaById.get(p.id) ?? entradaLabel : entradaLabel,
       })
     }
     setRows(out)
@@ -235,13 +314,57 @@ export default function EpochTransformPage() {
             </div>
 
             {mode === 'single' ? (
-              <CoordinateEntry
-                system={entrySystem}
-                onSystemChange={setEntrySystem}
-                onChange={onSingleGeo}
-                idValue={singleId}
-                onIdChange={setSingleId}
-              />
+              <>
+                <CoordinateEntry
+                  system={entrySystem}
+                  onSystemChange={setEntrySystem}
+                  onChange={onSingleGeo}
+                  idValue={singleId}
+                  onIdChange={setSingleId}
+                />
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button variant="secondary" onClick={addToQueue} disabled={!singleGeo}>
+                    + Agregar a la lista
+                  </Button>
+                  {queue.length > 0 && (
+                    <Button variant="ghost" onClick={clearQueue}>
+                      Limpiar lista
+                    </Button>
+                  )}
+                </div>
+
+                {queue.length > 0 && (
+                  <div className="mt-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <p className="border-b border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                      Lista de puntos ({queue.length})
+                    </p>
+                    <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {queue.map((q) => (
+                        <li key={q.id} className="flex items-center justify-between gap-2 px-3 py-2 text-xs">
+                          <span className="min-w-0">
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{q.id}</span>{' '}
+                            <span className="tabular text-slate-500 dark:text-slate-400">
+                              {formatDms(q.lat, 'lat')} · {formatDms(q.lon, 'lon')} · {q.h.toFixed(3)} m
+                            </span>
+                          </span>
+                          <button
+                            onClick={() => removeFromQueue(q.id)}
+                            className="shrink-0 rounded px-1.5 py-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
+                            aria-label={`Quitar ${q.id}`}
+                          >
+                            ✕
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  Agrega los puntos uno a uno; la lista se guarda en este navegador. Al
+                  transformar se procesan todos juntos (lista + el punto en pantalla).
+                </p>
+              </>
             ) : (
               <>
                 <div className="mb-3">
@@ -287,7 +410,11 @@ export default function EpochTransformPage() {
             )}
 
             <Button onClick={transform} disabled={busy || parsed.points.length === 0} className="mt-3 w-full">
-              {busy ? 'Calculando…' : 'Transformar'}
+              {busy
+                ? 'Calculando…'
+                : parsed.points.length > 1
+                  ? `Transformar ${parsed.points.length} puntos`
+                  : 'Transformar'}
             </Button>
           </Card>
 

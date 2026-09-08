@@ -19,7 +19,7 @@ ver `brand/` para usar el logotipo en mapa de bits.
 | `/red-pasiva` | Mojones y placas de control (órdenes 2-4): mapa, búsqueda por lugar/código y descarga de la reseña (PDF). |
 | `/tiempos` | Tiempo mínimo de ocupación: modelo *Guía de alturas* (15 + 5·d) y rangos por orden de la *Resolución 1468 de 2021*. |
 | `/coordenadas` | Entrada en cualquier sistema (geográficas en grados o G° M' S", geocéntricas X/Y/Z, CTM12, Gauss-Krüger, UTM) → todas las representaciones, con botón de copiar. |
-| `/epoca` | Transformación de coordenadas entre épocas con VEMOS2022 (SIRGAS); punto único o CSV/TXT → geográficas, geocéntricas y planas. |
+| `/epoca` | Transformación de coordenadas entre épocas con VEMOS2022 (SIRGAS). Entrada manual con casillas (lista acumulable, se guarda en el navegador) o CSV/TXT → geográficas, geocéntricas y planas, con memoria de cálculo para el informe. |
 | `/rinex` | Disponibilidad, latencia y descarga (ZIP) de archivos RINEX por estación — API del IGAC. |
 | `/estado` | Semáforo de latencia de todas las estaciones; verificación por lote + snapshot diario. |
 | `/efemerides` | Enlaces a efemérides IGS (transmitidas / ultrarrápidas / rápidas / finales) por fecha, con nombre de archivo y espejos. |
