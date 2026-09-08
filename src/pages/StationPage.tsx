@@ -103,8 +103,12 @@ function StationDetail({ station: s }: { station: GnssStation }) {
           Coordenadas oficiales
         </h3>
         <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
-          Datum MAGNA-SIRGAS{s.datum ? ` (EPSG:${s.datum})` : ''}. Fuente: Centro de
-          Control Geodésico del IGAC.
+          Coordenadas geodésicas ajustadas (no navegadas) en el marco MAGNA-SIRGAS
+          {s.datum ? ` (EPSG:${s.datum})` : ''}, calculadas por el Centro de Control
+          Geodésico del IGAC. Están en una época de referencia fija de la realización
+          MAGNA-SIRGAS (~2018.4), sin propagar a la fecha actual. Para la posición en
+          tu época de observación y la velocidad de la estación, usa la solución
+          multianual de SIRGAS (abajo).
         </p>
         <DataRow label="Latitud" value={formatDms(s.lat, 'lat')} />
         <DataRow label="Longitud" value={formatDms(s.lon, 'lon')} />
