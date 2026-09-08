@@ -19,6 +19,7 @@ ver `brand/` para usar el logotipo en mapa de bits.
 | `/red-pasiva` | Mojones y placas de control (órdenes 2-4): mapa, búsqueda por lugar/código y descarga de la reseña (PDF). |
 | `/tiempos` | Tiempo mínimo de ocupación: modelo *Guía de alturas* (15 + 5·d) y rangos por orden de la *Resolución 1468 de 2021*. |
 | `/coordenadas` | Geográficas MAGNA-SIRGAS ↔ Origen Nacional CTM12, Gauss-Krüger (5 orígenes), UTM y geocéntricas. |
+| `/epoca` | Transformación de coordenadas entre épocas con VEMOS2022 (SIRGAS); punto único o CSV/TXT → geográficas, geocéntricas y planas. |
 | `/rinex` | Disponibilidad, latencia y descarga (ZIP) de archivos RINEX por estación — API del IGAC. |
 | `/estado` | Semáforo de latencia de todas las estaciones; verificación por lote + snapshot diario. |
 | `/efemerides` | Enlaces a efemérides IGS (transmitidas / ultrarrápidas / rápidas / finales) por fecha, con nombre de archivo y espejos. |
@@ -67,6 +68,7 @@ src/
 scripts/
   build-stations.py    regenera src/data/stations.ts
   build-vertices.py    regenera public/vertices.json (red pasiva, ~10 k mojones)
+  build-vemos.py       regenera public/vemos2022.json (subconjunto Colombia del modelo VEMOS2022)
   status-snapshot.py   regenera public/stations-status.json
 .github/workflows/
   stations-status.yml  corre status-snapshot.py a diario y hace commit

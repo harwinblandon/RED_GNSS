@@ -48,11 +48,20 @@ export default function AboutPage() {
             transmitidas y precisas.
           </li>
           <li>
+            <ExternalLink href="https://sirgas.ipgh.org/en/products/vemos/">
+              VEMOS2022
+            </ExternalLink>{' '}
+            (DGFI-TUM / SIRGAS; Sánchez et al. 2022,{' '}
+            <ExternalLink href="https://doi.org/10.1515/jogs-2022-0138">
+              doi:10.1515/jogs-2022-0138
+            </ExternalLink>
+            ) — modelo de velocidades para la transformación de coordenadas entre épocas.
+          </li>
+          <li>
             <ExternalLink href="https://geodesy.unr.edu/">
               Nevada Geodetic Laboratory (UNR)
             </ExternalLink>{' '}
-            — velocidades MIDAS de las estaciones, usadas para propagar coordenadas
-            entre épocas (valores aproximados).
+            — velocidades MIDAS por estación (valores aproximados, en la Ficha de estación).
           </li>
           <li>
             <ExternalLink href="https://www.openstreetmap.org/copyright">

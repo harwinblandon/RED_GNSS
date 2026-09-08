@@ -14,6 +14,7 @@ const RinexAccessPage = lazy(() => import('../pages/RinexAccessPage'))
 const StationStatusPage = lazy(() => import('../pages/StationStatusPage'))
 const GpsCalendarPage = lazy(() => import('../pages/GpsCalendarPage'))
 const CoordinatesPage = lazy(() => import('../pages/CoordinatesPage'))
+const EpochTransformPage = lazy(() => import('../pages/EpochTransformPage'))
 const EphemeridesPage = lazy(() => import('../pages/EphemeridesPage'))
 const AboutPage = lazy(() => import('../pages/AboutPage'))
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'))
@@ -45,6 +46,7 @@ export const router = createHashRouter([
       { path: 'estado', element: <Lazy><StationStatusPage /></Lazy> },
       { path: 'calendario-gps', element: <Lazy><GpsCalendarPage /></Lazy> },
       { path: 'coordenadas', element: <Lazy><CoordinatesPage /></Lazy> },
+      { path: 'epoca', element: <Lazy><EpochTransformPage /></Lazy> },
       { path: 'efemerides', element: <Lazy><EphemeridesPage /></Lazy> },
       { path: 'acerca-de', element: <Lazy><AboutPage /></Lazy> },
       { path: '404', element: <Lazy><NotFoundPage /></Lazy> },

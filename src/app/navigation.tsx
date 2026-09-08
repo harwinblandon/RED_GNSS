@@ -87,6 +87,13 @@ export const NAV_ITEMS: NavItem[] = [
     icon: MapIcon,
   },
   {
+    path: '/epoca',
+    label: 'Transformación de época',
+    description:
+      'Propaga coordenadas entre épocas con VEMOS2022 (SIRGAS). Un punto o un CSV/TXT → geográficas, geocéntricas y planas en la época destino.',
+    icon: ClockIcon,
+  },
+  {
     path: '/calendario-gps',
     label: 'Calendario GPS',
     description:
