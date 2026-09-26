@@ -1,30 +1,30 @@
 {
- "generated": "2026-09-25T11:54:18+00:00",
+ "generated": "2026-09-26T11:28:49+00:00",
  "source": "https://ccg.igac.gov.co/api/rinex",
  "stations": {
   "ABAD": {
-   "lastDate": "2026-09-22",
-   "files": 2698
+   "lastDate": "2026-09-23",
+   "files": 2703
   },
   "ABCC": {
-   "lastDate": "2026-09-22",
-   "files": 12175
+   "lastDate": "2026-09-23",
+   "files": 12178
   },
   "ABPD": {
-   "lastDate": "2026-09-22",
-   "files": 10711
+   "lastDate": "2026-09-23",
+   "files": 10714
   },
   "ACAN": {
-   "lastDate": "2026-09-22",
-   "files": 1516
+   "lastDate": "2026-09-23",
+   "files": 1521
   },
   "ACAR": {
-   "lastDate": "2026-09-22",
-   "files": 840
+   "lastDate": "2026-09-23",
+   "files": 845
   },
   "ACDZ": {
-   "lastDate": "2026-09-22",
-   "files": 4177
+   "lastDate": "2026-09-23",
+   "files": 4182
   },
   "AEBS": {
    "lastDate": "2026-09-22",
@@ -39,12 +39,12 @@
    "files": 6639
   },
   "AEFO": {
-   "lastDate": "2026-09-22",
-   "files": 7856
+   "lastDate": "2026-09-23",
+   "files": 7861
   },
   "AEGU": {
-   "lastDate": "2026-09-22",
-   "files": 9914
+   "lastDate": "2026-09-23",
+   "files": 9919
   },
   "AEMO": {
    "lastDate": "2026-09-22",
@@ -55,8 +55,8 @@
    "files": 2672
   },
   "AEP2": {
-   "lastDate": "2026-09-22",
-   "files": 1368
+   "lastDate": "2026-09-23",
+   "files": 1372
   },
   "AEPA": {
    "lastDate": "2026-09-22",
@@ -67,44 +67,44 @@
    "files": 5759
   },
   "AGAB": {
-   "lastDate": "2026-09-22",
-   "files": 8380
+   "lastDate": "2026-09-23",
+   "files": 8385
   },
   "AGBO": {
-   "lastDate": "2026-09-22",
-   "files": 4357
+   "lastDate": "2026-09-23",
+   "files": 4362
   },
   "AGCA": {
-   "lastDate": "2026-09-22",
-   "files": 15013
+   "lastDate": "2026-09-23",
+   "files": 15018
   },
   "ALBE": {
-   "lastDate": "2026-09-22",
-   "files": 14177
+   "lastDate": "2026-09-23",
+   "files": 14182
   },
   "APTO": {
    "lastDate": "2026-09-16",
    "files": 15730
   },
   "ARCA": {
-   "lastDate": "2026-09-22",
-   "files": 19895
+   "lastDate": "2026-09-23",
+   "files": 19900
   },
   "ARIC": {
-   "lastDate": "2026-09-22",
-   "files": 3304
+   "lastDate": "2026-09-23",
+   "files": 3309
   },
   "ARIP": {
-   "lastDate": "2026-09-22",
-   "files": 3582
+   "lastDate": "2026-09-23",
+   "files": 3587
   },
   "ASTR": {
-   "lastDate": "2026-09-22",
-   "files": 3955
+   "lastDate": "2026-09-23",
+   "files": 3960
   },
   "AYAP": {
-   "lastDate": "2026-09-22",
-   "files": 3545
+   "lastDate": "2026-09-23",
+   "files": 3550
   },
   "BACO": {
    "lastDate": "2026-09-22",
@@ -119,116 +119,116 @@
    "files": 857
   },
   "BECE": {
-   "lastDate": "2026-09-22",
-   "files": 11966
+   "lastDate": "2026-09-23",
+   "files": 11971
   },
   "BEJA": {
-   "lastDate": "2026-09-22",
-   "files": 17111
+   "lastDate": "2026-09-23",
+   "files": 17116
   },
   "BERR": {
-   "lastDate": "2026-09-22",
-   "files": 15024
+   "lastDate": "2026-09-23",
+   "files": 15029
   },
   "BETE": {
-   "lastDate": "2026-09-22",
-   "files": 3705
+   "lastDate": "2026-09-23",
+   "files": 3710
   },
   "BNGA": {
-   "lastDate": "2026-09-22",
-   "files": 16852
+   "lastDate": "2026-09-23",
+   "files": 16857
   },
   "BOBG": {
    "lastDate": "2026-09-22",
    "files": 1906
   },
   "BOGA": {
-   "lastDate": "2026-09-22",
-   "files": 28588
+   "lastDate": "2026-09-23",
+   "files": 28593
   },
   "BQLA": {
-   "lastDate": "2026-09-22",
-   "files": 15737
+   "lastDate": "2026-09-23",
+   "files": 15742
   },
   "BUEN": {
-   "lastDate": "2026-09-22",
-   "files": 21935
+   "lastDate": "2026-09-23",
+   "files": 21940
   },
   "CALI": {
-   "lastDate": "2026-09-22",
-   "files": 25467
+   "lastDate": "2026-09-23",
+   "files": 25472
   },
   "CAPI": {
    "lastDate": "2026-07-15",
    "files": 3183
   },
   "CART": {
-   "lastDate": "2026-09-22",
-   "files": 15446
+   "lastDate": "2026-09-23",
+   "files": 15451
   },
   "CASI": {
-   "lastDate": "2026-09-22",
-   "files": 12008
+   "lastDate": "2026-09-23",
+   "files": 12013
   },
   "CBYA": {
-   "lastDate": "2026-09-22",
-   "files": 2668
+   "lastDate": "2026-09-23",
+   "files": 2673
   },
   "CCHA": {
-   "lastDate": "2026-09-22",
-   "files": 4639
+   "lastDate": "2026-09-23",
+   "files": 4644
   },
   "CHRL": {
-   "lastDate": "2026-09-22",
-   "files": 3534
+   "lastDate": "2026-09-23",
+   "files": 3539
   },
   "CHVL": {
-   "lastDate": "2026-09-22",
-   "files": 3304
+   "lastDate": "2026-09-23",
+   "files": 3309
   },
   "CLMA": {
-   "lastDate": "2026-09-22",
-   "files": 4936
+   "lastDate": "2026-09-23",
+   "files": 4941
   },
   "CMBI": {
    "lastDate": "2026-09-21",
    "files": 6916
   },
   "CMNI": {
-   "lastDate": "2026-09-22",
-   "files": 7004
+   "lastDate": "2026-09-23",
+   "files": 7009
   },
   "CPAS": {
    "lastDate": "2026-09-22",
    "files": 5501
   },
   "CRRU": {
-   "lastDate": "2026-09-22",
-   "files": 4590
+   "lastDate": "2026-09-23",
+   "files": 4595
   },
   "CUCU": {
-   "lastDate": "2026-09-22",
-   "files": 23397
+   "lastDate": "2026-09-23",
+   "files": 23402
   },
   "DAGA": {
    "lastDate": "2026-09-22",
    "files": 3802
   },
   "DIBU": {
-   "lastDate": "2026-09-22",
-   "files": 2793
+   "lastDate": "2026-09-23",
+   "files": 2798
   },
   "DICA": {
    "lastDate": "2026-09-22",
    "files": 6946
   },
   "DIST": {
-   "lastDate": "2026-09-22",
-   "files": 2237
+   "lastDate": "2026-09-23",
+   "files": 2242
   },
   "DORA": {
-   "lastDate": "2026-09-22",
-   "files": 23274
+   "lastDate": "2026-09-23",
+   "files": 23279
   },
   "EBPT": {
    "lastDate": "2026-09-14",
@@ -239,28 +239,28 @@
    "files": 2808
   },
   "FLRN": {
-   "lastDate": "2026-09-22",
-   "files": 2711
+   "lastDate": "2026-09-23",
+   "files": 2716
   },
   "FQNE": {
-   "lastDate": "2026-09-22",
-   "files": 17365
+   "lastDate": "2026-09-23",
+   "files": 17370
   },
   "GARA": {
-   "lastDate": "2026-09-22",
-   "files": 20478
+   "lastDate": "2026-09-23",
+   "files": 20483
   },
   "GGUE": {
-   "lastDate": "2026-09-22",
-   "files": 8461
+   "lastDate": "2026-09-23",
+   "files": 8466
   },
   "GNDA": {
-   "lastDate": "2026-09-22",
-   "files": 3968
+   "lastDate": "2026-09-23",
+   "files": 3973
   },
   "GRZN": {
-   "lastDate": "2026-09-22",
-   "files": 8193
+   "lastDate": "2026-09-23",
+   "files": 8198
   },
   "GUAP": {
    "lastDate": "2026-07-31",
@@ -271,12 +271,12 @@
    "files": 3709
   },
   "IBAG": {
-   "lastDate": "2026-09-22",
-   "files": 21517
+   "lastDate": "2026-09-23",
+   "files": 21522
   },
   "IGAC": {
-   "lastDate": "2026-09-22",
-   "files": 3652
+   "lastDate": "2026-09-23",
+   "files": 3657
   },
   "INIR": {
    "lastDate": "2026-06-03",
@@ -299,96 +299,96 @@
    "files": 3464
   },
   "ISTM": {
-   "lastDate": "2026-09-22",
-   "files": 3689
+   "lastDate": "2026-09-23",
+   "files": 3694
   },
   "JURA": {
-   "lastDate": "2026-09-22",
-   "files": 1276
+   "lastDate": "2026-09-23",
+   "files": 1281
   },
   "LEGU": {
-   "lastDate": "2026-09-22",
-   "files": 3788
+   "lastDate": "2026-09-23",
+   "files": 3793
   },
   "LEMA": {
-   "lastDate": "2026-09-22",
-   "files": 283
+   "lastDate": "2026-09-23",
+   "files": 288
   },
   "LIPA": {
-   "lastDate": "2026-09-22",
-   "files": 7047
+   "lastDate": "2026-09-23",
+   "files": 7052
   },
   "LPDR": {
-   "lastDate": "2026-09-22",
-   "files": 2538
+   "lastDate": "2026-09-23",
+   "files": 2543
   },
   "MAIC": {
-   "lastDate": "2026-09-22",
-   "files": 3308
+   "lastDate": "2026-09-23",
+   "files": 3313
   },
   "MEDE": {
-   "lastDate": "2026-09-22",
-   "files": 23749
+   "lastDate": "2026-09-23",
+   "files": 23754
   },
   "MFLO": {
-   "lastDate": "2026-09-22",
-   "files": 4545
+   "lastDate": "2026-09-23",
+   "files": 4550
   },
   "MGUI": {
    "lastDate": "2026-07-10",
    "files": 4586
   },
   "MILN": {
-   "lastDate": "2026-09-22",
-   "files": 4830
+   "lastDate": "2026-09-23",
+   "files": 4835
   },
   "MITU": {
    "lastDate": "2026-09-22",
    "files": 1665
   },
   "MJGL": {
-   "lastDate": "2026-09-22",
-   "files": 8584
+   "lastDate": "2026-09-23",
+   "files": 8589
   },
   "MLGS": {
-   "lastDate": "2026-09-22",
-   "files": 4626
+   "lastDate": "2026-09-23",
+   "files": 4631
   },
   "MORA": {
    "lastDate": "2026-09-22",
    "files": 6214
   },
   "MPAN": {
-   "lastDate": "2026-09-22",
-   "files": 4954
+   "lastDate": "2026-09-23",
+   "files": 4959
   },
   "MSET": {
-   "lastDate": "2026-09-22",
-   "files": 4873
+   "lastDate": "2026-09-23",
+   "files": 4878
   },
   "MURI": {
-   "lastDate": "2026-09-22",
-   "files": 1271
+   "lastDate": "2026-09-23",
+   "files": 1276
   },
   "MUTT": {
-   "lastDate": "2026-09-22",
-   "files": 2753
+   "lastDate": "2026-09-23",
+   "files": 2758
   },
   "NECI": {
-   "lastDate": "2026-09-22",
-   "files": 4551
+   "lastDate": "2026-09-23",
+   "files": 4556
   },
   "NECL": {
-   "lastDate": "2026-09-22",
-   "files": 1272
+   "lastDate": "2026-09-23",
+   "files": 1277
   },
   "NEVA": {
-   "lastDate": "2026-09-22",
-   "files": 21301
+   "lastDate": "2026-09-23",
+   "files": 21306
   },
   "NZTH": {
-   "lastDate": "2026-09-22",
-   "files": 1301
+   "lastDate": "2026-09-23",
+   "files": 1306
   },
   "OCEL": {
    "lastDate": "2026-09-07",
@@ -399,36 +399,36 @@
    "files": 1196
   },
   "ORCU": {
-   "lastDate": "2026-09-22",
-   "files": 1017
+   "lastDate": "2026-09-23",
+   "files": 1022
   },
   "ORIT": {
-   "lastDate": "2026-09-22",
-   "files": 4115
+   "lastDate": "2026-09-23",
+   "files": 4120
   },
   "OVJA": {
-   "lastDate": "2026-09-22",
-   "files": 1891
+   "lastDate": "2026-09-23",
+   "files": 1896
   },
   "OVSC": {
    "lastDate": "2026-09-22",
    "files": 6644
   },
   "P4VI": {
-   "lastDate": "2026-09-22",
-   "files": 4508
+   "lastDate": "2026-09-23",
+   "files": 4513
   },
   "PAL2": {
    "lastDate": "2026-09-22",
    "files": 6272
   },
   "PAMP": {
-   "lastDate": "2026-09-22",
-   "files": 17321
+   "lastDate": "2026-09-23",
+   "files": 17326
   },
   "PAPU": {
-   "lastDate": "2026-09-22",
-   "files": 875
+   "lastDate": "2026-09-23",
+   "files": 880
   },
   "PASI": {
    "lastDate": "2026-09-22",
@@ -439,116 +439,116 @@
    "files": 4502
   },
   "PBYA": {
-   "lastDate": "2026-09-22",
-   "files": 2791
+   "lastDate": "2026-09-23",
+   "files": 2796
   },
   "PERA": {
-   "lastDate": "2026-09-22",
-   "files": 17878
+   "lastDate": "2026-09-23",
+   "files": 17883
   },
   "PGUZ": {
-   "lastDate": "2026-09-22",
-   "files": 7658
+   "lastDate": "2026-09-23",
+   "files": 7663
   },
   "PIVI": {
-   "lastDate": "2026-09-22",
-   "files": 2149
+   "lastDate": "2026-09-23",
+   "files": 2154
   },
   "PLCO": {
    "lastDate": "2026-08-26",
    "files": 3636
   },
   "PLTA": {
-   "lastDate": "2026-09-22",
-   "files": 3999
+   "lastDate": "2026-09-23",
+   "files": 4004
   },
   "PLTR": {
    "lastDate": "2026-09-22",
    "files": 5401
   },
   "POPA": {
-   "lastDate": "2026-09-22",
-   "files": 20380
+   "lastDate": "2026-09-23",
+   "files": 20385
   },
   "POSP": {
-   "lastDate": "2026-09-22",
-   "files": 4584
+   "lastDate": "2026-09-23",
+   "files": 4589
   },
   "PRIC": {
-   "lastDate": "2026-09-22",
-   "files": 4951
+   "lastDate": "2026-09-23",
+   "files": 4956
   },
   "PRVA": {
-   "lastDate": "2026-09-22",
-   "files": 8960
+   "lastDate": "2026-09-23",
+   "files": 8965
   },
   "PSTO": {
-   "lastDate": "2026-09-22",
-   "files": 25047
+   "lastDate": "2026-09-23",
+   "files": 25052
   },
   "PTIA": {
    "lastDate": "2026-09-02",
    "files": 6493
   },
   "PTRI": {
-   "lastDate": "2026-09-22",
-   "files": 4896
+   "lastDate": "2026-09-23",
+   "files": 4901
   },
   "PUBE": {
    "lastDate": "2026-09-22",
    "files": 2329
   },
   "PUFI": {
-   "lastDate": "2026-09-22",
-   "files": 2797
+   "lastDate": "2026-09-23",
+   "files": 2802
   },
   "PULL": {
-   "lastDate": "2026-09-22",
-   "files": 5096
+   "lastDate": "2026-09-23",
+   "files": 5101
   },
   "PUNR": {
-   "lastDate": "2026-09-22",
-   "files": 2792
+   "lastDate": "2026-09-23",
+   "files": 2797
   },
   "PURO": {
-   "lastDate": "2026-09-22",
-   "files": 3523
+   "lastDate": "2026-09-23",
+   "files": 3528
   },
   "QBDO": {
-   "lastDate": "2026-09-22",
-   "files": 3598
+   "lastDate": "2026-09-23",
+   "files": 3603
   },
   "QUIL": {
    "lastDate": "2026-07-09",
    "files": 2105
   },
   "RIOH": {
-   "lastDate": "2026-09-22",
-   "files": 6815
+   "lastDate": "2026-09-23",
+   "files": 6820
   },
   "RSLA": {
-   "lastDate": "2026-09-22",
-   "files": 8221
+   "lastDate": "2026-09-23",
+   "files": 8226
   },
   "SAFE": {
-   "lastDate": "2026-09-22",
-   "files": 725
+   "lastDate": "2026-09-23",
+   "files": 730
   },
   "SAMA": {
-   "lastDate": "2026-09-22",
-   "files": 25906
+   "lastDate": "2026-09-23",
+   "files": 25911
   },
   "SARO": {
-   "lastDate": "2026-09-22",
-   "files": 7040
+   "lastDate": "2026-09-23",
+   "files": 7045
   },
   "SDTA": {
-   "lastDate": "2026-09-22",
-   "files": 8825
+   "lastDate": "2026-09-23",
+   "files": 8830
   },
   "SDTO": {
-   "lastDate": "2026-09-22",
-   "files": 2794
+   "lastDate": "2026-09-23",
+   "files": 2799
   },
   "SEL1": {
    "lastDate": "2026-09-22",
@@ -563,76 +563,76 @@
    "files": 4469
   },
   "SILP": {
-   "lastDate": "2026-09-22",
-   "files": 8947
+   "lastDate": "2026-09-23",
+   "files": 8952
   },
   "SINC": {
-   "lastDate": "2026-09-22",
-   "files": 20407
+   "lastDate": "2026-09-23",
+   "files": 20412
   },
   "SIPI": {
    "lastDate": "2026-08-09",
    "files": 1050
   },
   "SJFR": {
-   "lastDate": "2026-09-22",
-   "files": 3454
+   "lastDate": "2026-09-23",
+   "files": 3459
   },
   "SJGM": {
-   "lastDate": "2026-09-22",
-   "files": 877
+   "lastDate": "2026-09-23",
+   "files": 878
   },
   "SJGU": {
-   "lastDate": "2026-09-22",
-   "files": 5319
+   "lastDate": "2026-09-23",
+   "files": 5324
   },
   "SJNE": {
-   "lastDate": "2026-09-22",
-   "files": 9522
+   "lastDate": "2026-09-23",
+   "files": 9527
   },
   "SLCB": {
-   "lastDate": "2026-09-22",
-   "files": 5242
+   "lastDate": "2026-09-23",
+   "files": 5247
   },
   "SLTA": {
-   "lastDate": "2026-09-22",
-   "files": 4102
+   "lastDate": "2026-09-23",
+   "files": 4107
   },
   "SNSN": {
-   "lastDate": "2026-09-22",
-   "files": 16156
+   "lastDate": "2026-09-23",
+   "files": 16161
   },
   "SOCB": {
-   "lastDate": "2026-09-22",
-   "files": 9907
+   "lastDate": "2026-09-23",
+   "files": 9912
   },
   "SOLN": {
-   "lastDate": "2026-09-22",
-   "files": 200
+   "lastDate": "2026-09-23",
+   "files": 205
   },
   "SONE": {
-   "lastDate": "2026-09-22",
-   "files": 10064
+   "lastDate": "2026-09-23",
+   "files": 10069
   },
   "SRSR": {
-   "lastDate": "2026-09-22",
-   "files": 5493
+   "lastDate": "2026-09-23",
+   "files": 5498
   },
   "SUAM": {
    "lastDate": "2026-09-22",
    "files": 5127
   },
   "SUAN": {
-   "lastDate": "2026-09-09",
-   "files": 6800
+   "lastDate": "2026-09-23",
+   "files": 6805
   },
   "SUES": {
    "lastDate": "2026-09-01",
    "files": 8668
   },
   "SVDC": {
-   "lastDate": "2026-09-22",
-   "files": 4956
+   "lastDate": "2026-09-23",
+   "files": 4961
   },
   "SVNA": {
    "lastDate": "2026-09-22",
@@ -643,8 +643,8 @@
    "files": 835
   },
   "TARZ": {
-   "lastDate": "2026-09-22",
-   "files": 9852
+   "lastDate": "2026-09-23",
+   "files": 9857
   },
   "TCOA": {
    "lastDate": "2026-09-22",
@@ -667,40 +667,40 @@
    "files": 2832
   },
   "TPPI": {
-   "lastDate": "2026-09-22",
-   "files": 5996
+   "lastDate": "2026-09-23",
+   "files": 6001
   },
   "TRDA": {
-   "lastDate": "2026-09-22",
-   "files": 7619
+   "lastDate": "2026-09-23",
+   "files": 7624
   },
   "TUMC": {
-   "lastDate": "2026-09-22",
-   "files": 7184
+   "lastDate": "2026-09-23",
+   "files": 7189
   },
   "TUNA": {
-   "lastDate": "2026-09-22",
-   "files": 25786
+   "lastDate": "2026-09-23",
+   "files": 25791
   },
   "TUQU": {
-   "lastDate": "2026-09-22",
-   "files": 9192
+   "lastDate": "2026-09-23",
+   "files": 9197
   },
   "UDAP": {
    "lastDate": "2026-09-21",
    "files": 4676
   },
   "UIBE": {
-   "lastDate": "2026-09-22",
-   "files": 4077
+   "lastDate": "2026-09-23",
+   "files": 4082
   },
   "UNCA": {
    "lastDate": "2026-07-20",
    "files": 6167
   },
   "UNGU": {
-   "lastDate": "2026-09-22",
-   "files": 1271
+   "lastDate": "2026-09-23",
+   "files": 1276
   },
   "UNIO": {
    "lastDate": "2026-06-20",
@@ -715,16 +715,16 @@
    "files": 1074
   },
   "URTE": {
-   "lastDate": "2026-09-22",
-   "files": 1516
+   "lastDate": "2026-09-23",
+   "files": 1521
   },
   "UWAS": {
    "lastDate": "2026-09-22",
    "files": 3235
   },
   "VALL": {
-   "lastDate": "2026-09-22",
-   "files": 19603
+   "lastDate": "2026-09-23",
+   "files": 19608
   },
   "VAUC": {
    "lastDate": "2026-06-02",
@@ -755,12 +755,12 @@
    "files": 3349
   },
   "VHER": {
-   "lastDate": "2026-09-22",
-   "files": 4691
+   "lastDate": "2026-09-23",
+   "files": 4696
   },
   "VLEN": {
-   "lastDate": "2026-09-22",
-   "files": 4011
+   "lastDate": "2026-09-23",
+   "files": 4016
   },
   "VMAG": {
    "lastDate": "2026-09-22",
@@ -819,20 +819,20 @@
    "files": 3921
   },
   "YARU": {
-   "lastDate": "2026-09-22",
-   "files": 2776
+   "lastDate": "2026-09-23",
+   "files": 2781
   },
   "YOPA": {
-   "lastDate": "2026-09-22",
-   "files": 10023
+   "lastDate": "2026-09-23",
+   "files": 10028
   },
   "ZARZ": {
-   "lastDate": "2026-09-22",
-   "files": 21764
+   "lastDate": "2026-09-23",
+   "files": 21769
   },
   "ZBNO": {
-   "lastDate": "2026-09-22",
-   "files": 6880
+   "lastDate": "2026-09-23",
+   "files": 6885
   }
  }
 }
