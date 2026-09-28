@@ -61,6 +61,18 @@ export const SignalIcon = (p: IconProps) => (
   </Base>
 )
 
+export const HistoryIcon = (p: IconProps) => (
+  <Base {...p}>
+    <rect x="3" y="4" width="4" height="4" rx="1" />
+    <rect x="10" y="4" width="4" height="4" rx="1" />
+    <rect x="17" y="4" width="4" height="4" rx="1" />
+    <rect x="3" y="11" width="4" height="4" rx="1" />
+    <rect x="10" y="11" width="4" height="4" rx="1" />
+    <rect x="3" y="18" width="4" height="2" rx="1" />
+    <path d="M17 13h4M17 19l4-4" />
+  </Base>
+)
+
 export const CalendarIcon = (p: IconProps) => (
   <Base {...p}>
     <rect x="3" y="5" width="18" height="16" rx="2" />

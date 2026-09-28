@@ -5,6 +5,7 @@ import {
   ClockIcon,
   CrosshairIcon,
   DownloadIcon,
+  HistoryIcon,
   InfoIcon,
   MapIcon,
   MarkerIcon,
@@ -64,6 +65,13 @@ export const NAV_ITEMS: NavItem[] = [
     description:
       'Semáforo de operatividad: qué tan recientes son los datos RINEX de cada estación, con filtros y verificación por lote.',
     icon: SignalIcon,
+  },
+  {
+    path: '/historico',
+    label: 'Histórico de disponibilidad',
+    description:
+      'Días con datos de cada estación en el último año, cobertura diaria de la red y alertas de caídas, intermitencias y recuperaciones.',
+    icon: HistoryIcon,
   },
   {
     path: '/efemerides',

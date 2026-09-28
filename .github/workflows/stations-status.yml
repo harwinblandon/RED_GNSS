@@ -1,7 +1,8 @@
 name: Snapshot de estado de estaciones
 
-# Actualiza public/stations-status.json con la fecha del último RINEX de cada
-# estación activa. La app lo usa como estado inicial del panel /estado.
+# Actualiza public/stations-status.json (fecha del último RINEX de cada estación
+# activa, para /estado) y public/stations-history.json (días con datos del
+# último año, para /historico).
 
 on:
   schedule:
@@ -31,12 +32,12 @@ jobs:
 
       - name: Commit si cambió
         run: |
-          if git diff --quiet -- public/stations-status.json; then
+          if git diff --quiet -- public/stations-status.json public/stations-history.json && [ -z "$(git ls-files --others --exclude-standard public/stations-history.json)" ]; then
             echo "Sin cambios."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/stations-status.json
+          git add public/stations-status.json public/stations-history.json
           git commit -m "chore: actualizar snapshot de estado de estaciones"
           git push

@@ -12,6 +12,7 @@ const PlanningPage = lazy(() => import('../pages/PlanningPage'))
 const OccupationTimePage = lazy(() => import('../pages/OccupationTimePage'))
 const RinexAccessPage = lazy(() => import('../pages/RinexAccessPage'))
 const StationStatusPage = lazy(() => import('../pages/StationStatusPage'))
+const AvailabilityPage = lazy(() => import('../pages/AvailabilityPage'))
 const GpsCalendarPage = lazy(() => import('../pages/GpsCalendarPage'))
 const CoordinatesPage = lazy(() => import('../pages/CoordinatesPage'))
 const EpochTransformPage = lazy(() => import('../pages/EpochTransformPage'))
@@ -44,6 +45,7 @@ export const router = createHashRouter([
       { path: 'tiempos', element: <Lazy><OccupationTimePage /></Lazy> },
       { path: 'rinex', element: <Lazy><RinexAccessPage /></Lazy> },
       { path: 'estado', element: <Lazy><StationStatusPage /></Lazy> },
+      { path: 'historico', element: <Lazy><AvailabilityPage /></Lazy> },
       { path: 'calendario-gps', element: <Lazy><GpsCalendarPage /></Lazy> },
       { path: 'coordenadas', element: <Lazy><CoordinatesPage /></Lazy> },
       { path: 'epoca', element: <Lazy><EpochTransformPage /></Lazy> },

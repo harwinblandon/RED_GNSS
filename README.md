@@ -22,6 +22,7 @@ ver `brand/` para usar el logotipo en mapa de bits.
 | `/epoca` | Transformación de coordenadas entre épocas con VEMOS2022 (SIRGAS). Entrada manual con casillas (lista acumulable, se guarda en el navegador) o CSV/TXT → geográficas, geocéntricas y planas, con memoria de cálculo para el informe. |
 | `/rinex` | Disponibilidad, latencia y descarga (ZIP) de archivos RINEX por estación — API del IGAC. |
 | `/estado` | Semáforo de latencia de todas las estaciones; verificación por lote + snapshot diario. |
+| `/historico` | Días con datos de cada estación en el último año, cobertura diaria de la red y alertas (caídas, intermitencias, recuperaciones). |
 | `/efemerides` | Enlaces a efemérides IGS (transmitidas / ultrarrápidas / rápidas / finales) por fecha, con nombre de archivo y espejos. |
 | `/calendario-gps` | Fecha civil ↔ semana GPS, DOW, DOY, MJD, fecha juliana, letra de sesión. |
 
@@ -97,6 +98,12 @@ estaciones cuyas coordenadas en la fuente no corresponden a su municipio
 una GitHub Action diaria (`.github/workflows/stations-status.yml`), no en el
 navegador. La app lo carga como estado inicial y permite verificar estaciones
 puntuales bajo demanda.
+
+El mismo script escribe `public/stations-history.json`: por estación, un mapa de
+bits en hexadecimal con un bit por día del último año (1 = el IGAC publicó al
+menos un archivo de observación). La app calcula en el navegador los
+porcentajes, los huecos y las alertas. Como el IGAC publica con días de retraso,
+solo cuenta hasta el "horizonte": el último día que ya publicó la mayoría de la red.
 
 ### Servicios externos en tiempo de ejecución
 

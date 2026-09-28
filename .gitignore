@@ -28,3 +28,6 @@ dist-ssr
 
 # build caches
 scripts/.cache/
+
+# Python
+__pycache__/

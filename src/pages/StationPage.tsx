@@ -18,6 +18,8 @@ import {
   type WeeklySolution,
   type IgacWeeklyCoord,
 } from '../lib/solutions'
+import { loadHistory, stationStats, type NetworkHistory } from '../lib/availability'
+import { AvailabilityCalendar, Legend } from '../components/AvailabilityCharts'
 
 export default function StationPage() {
   const [params, setParams] = useSearchParams()
@@ -100,6 +102,8 @@ function StationDetail({ station: s }: { station: GnssStation }) {
           <DataRow label="Materialización" value={s.materialized ?? '—'} />
         </div>
       </Card>
+
+      <AvailabilityCard s={s} />
 
       <Card>
         <h3 className="mb-3 font-semibold text-slate-900 dark:text-white">
@@ -302,6 +306,49 @@ function IgacWeeklyCard({
 }
 
 const TODAY = isoDate(new Date())
+
+function AvailabilityCard({ s }: { s: GnssStation }) {
+  const [h, setH] = useState<NetworkHistory | null>(null)
+  useEffect(() => {
+    loadHistory().then(setH)
+  }, [])
+
+  const bits = h?.stations[s.id]
+  if (!h || !bits) return null
+  const st = stationStats(bits, h.horizon)
+  const pct = (v: number | null) => (v == null ? '—' : `${Math.round(v)} %`)
+
+  return (
+    <Card>
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="font-semibold text-slate-900 dark:text-white">Disponibilidad de datos</h3>
+        <a href="#/historico" className="text-xs font-medium text-brand-600 hover:underline dark:text-brand-300">
+          Histórico de la red →
+        </a>
+      </div>
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {([['30 días', st.pct[30]], ['90 días', st.pct[90]], ['Último año', st.pct[365]]] as const).map(([label, v]) => (
+          <div key={label}>
+            <p className="tabular text-xl font-semibold text-slate-900 dark:text-white">{pct(v)}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
+          </div>
+        ))}
+        <div>
+          <p className="tabular text-xl font-semibold text-slate-900 dark:text-white">
+            {st.longestGap.days > 0 ? `${st.longestGap.days} d` : '—'}
+          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Hueco más largo{st.longestGap.days > 0 && ` (desde ${h.dates[st.longestGap.from]})`}
+          </p>
+        </div>
+      </div>
+      <AvailabilityCalendar bits={bits} dates={h.dates} horizon={h.horizon} first={st.first} />
+      <div className="mt-2">
+        <Legend />
+      </div>
+    </Card>
+  )
+}
 
 function EpochCard({ s, latestWeekStart }: { s: GnssStation; latestWeekStart: string | null }) {
   const [mode, setMode] = useState<'weekly' | 'today' | 'custom'>('weekly')
