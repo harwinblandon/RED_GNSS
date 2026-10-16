@@ -12,6 +12,7 @@ import 'leaflet/dist/leaflet.css'
 import { PageHeader, Card, Field, TextInput, Select, DataRow, Button } from '../components/ui'
 import { PlaceSearch } from '../components/PlaceSearch'
 import { LocateButton } from '../components/LocateButton'
+import { SatelliteWindow } from '../components/SatelliteWindow'
 import { ACTIVE_STATIONS } from '../data/stations'
 import { nearestStations, type LatLon } from '../lib/geodesy'
 import { loadSnapshot, getCached } from '../lib/stationStatus'
@@ -120,10 +121,10 @@ export default function PlanningPage() {
     <div>
       <PageHeader
         title="Planeación de sesión"
-        subtitle="Define el punto, la fecha y el orden objetivo; obtén las estaciones de apoyo, tiempos de ocupación y efemérides, y exporta el plan."
+        subtitle="Define el punto, la fecha y el orden objetivo; obtén las estaciones de apoyo, tiempos de ocupación, la mejor ventana horaria (PDOP) y efemérides, y exporta el plan."
       />
 
-      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[20rem_1fr] lg:items-start print:block">
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[20rem_1fr] lg:items-stretch print:block">
         {/* 1. Punto */}
         <Card className="order-1 lg:col-start-1 lg:row-start-1 print:hidden">
           <div className="space-y-3">
@@ -205,7 +206,7 @@ export default function PlanningPage() {
         )}
 
         {/* 2. Mapa */}
-        <div className="order-2 h-[52vh] min-h-72 overflow-hidden rounded-xl border border-slate-200 sm:h-96 lg:col-start-2 lg:row-span-3 lg:row-start-1 print:hidden dark:border-slate-800">
+        <div className="order-2 h-[52vh] min-h-72 overflow-hidden rounded-xl border border-slate-200 sm:h-[28rem] lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:h-full lg:min-h-[36rem] print:hidden dark:border-slate-800">
           <MapContainer center={COLOMBIA_CENTER} zoom={6} style={{ height: '100%', width: '100%' }}>
               <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap" />
               <FitColombia />
@@ -250,7 +251,7 @@ export default function PlanningPage() {
         </div>
 
         {/* 5. Resultado */}
-        <div className="order-5 lg:col-start-2 lg:row-start-4 print:block">
+        <div className="order-5 lg:col-span-2 lg:row-start-4 print:block">
           {!point && (
             <Card className="print:hidden">
               <p className="text-sm text-slate-500">
@@ -350,6 +351,13 @@ function PlanReport({ plan }: { plan: ReturnType<typeof buildPlan> }) {
           Todas las estaciones (punto y apoyos) deben registrar de forma simultánea.
         </p>
       </Card>
+
+      <SatelliteWindow
+        lat={plan.point.lat}
+        lon={plan.point.lon}
+        date={plan.date}
+        durationMin={Math.max(plan.targetOrder.minMinutes, plan.alturasGoverningMinutes)}
+      />
 
       <Card>
         <h3 className="mb-3 font-semibold text-slate-900 dark:text-white">Efemérides</h3>

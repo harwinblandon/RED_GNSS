@@ -2,7 +2,8 @@ name: Snapshot de estado de estaciones
 
 # Actualiza public/stations-status.json (fecha del último RINEX de cada estación
 # activa, para /estado) y public/stations-history.json (días con datos del
-# último año, para /historico).
+# último año, para /historico). También refresca public/gnss-orbits.json
+# (TLE de GPS/GLONASS/Galileo/BeiDou para la ventana horaria de /planeacion).
 
 on:
   schedule:
@@ -30,14 +31,17 @@ jobs:
       - name: Generar snapshot
         run: python scripts/status-snapshot.py
 
+      - name: Órbitas GNSS (TLE)
+        run: python scripts/gnss-orbits.py || echo "Sin órbitas nuevas; se conserva el archivo anterior."
+
       - name: Commit si cambió
         run: |
-          if git diff --quiet -- public/stations-status.json public/stations-history.json && [ -z "$(git ls-files --others --exclude-standard public/stations-history.json)" ]; then
+          if git diff --quiet -- public/stations-status.json public/stations-history.json public/gnss-orbits.json && [ -z "$(git ls-files --others --exclude-standard public/stations-history.json)" ]; then
             echo "Sin cambios."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/stations-status.json public/stations-history.json
+          git add public/stations-status.json public/stations-history.json public/gnss-orbits.json
           git commit -m "chore: actualizar snapshot de estado de estaciones"
           git push

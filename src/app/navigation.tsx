@@ -28,7 +28,7 @@ export const NAV_ITEMS: NavItem[] = [
     path: '/planeacion',
     label: 'Planeación de sesión',
     description:
-      'Del punto y la fecha al plan completo: estaciones de apoyo, tiempos de ocupación, efemérides y exportables (PDF, CSV, KML).',
+      'Del punto y la fecha al plan completo: estaciones de apoyo, tiempos de ocupación, ventana horaria (PDOP), efemérides y exportables (PDF, CSV, KML).',
     icon: ClipboardIcon,
   },
   {
