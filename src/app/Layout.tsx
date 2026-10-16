@@ -4,8 +4,6 @@ import { NAV_ITEMS } from './navigation'
 import { useTheme } from './useTheme'
 import { MenuIcon, MoonIcon, SunIcon } from '../components/icons'
 import { LogoFull } from '../components/Logo'
-import { useAuth } from './auth'
-import { authEnabled } from '../lib/supabase'
 
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
   return (
@@ -67,7 +65,6 @@ export default function Layout() {
         {mobileOpen && (
           <div className="space-y-3 border-b border-slate-200 bg-white p-3 lg:hidden dark:border-[#2c2e32] dark:bg-[#1c1d20]">
             <NavList onNavigate={() => setMobileOpen(false)} />
-            <MobileSession />
           </div>
         )}
 
@@ -101,22 +98,6 @@ function Brand() {
   )
 }
 
-function MobileSession() {
-  const { email, signOut } = useAuth()
-  if (!authEnabled || !email) return null
-  return (
-    <div className="flex items-center justify-between gap-2 border-t border-slate-200 pt-3 text-xs text-slate-500 dark:border-[#2c2e32] dark:text-slate-400">
-      <span className="truncate">{email}</span>
-      <button
-        onClick={signOut}
-        className="shrink-0 rounded border border-slate-300 px-2 py-1 font-medium hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
-      >
-        Salir
-      </button>
-    </div>
-  )
-}
-
 function ThemeButton({ theme, onToggle }: { theme: string; onToggle: () => void }) {
   return (
     <button
@@ -130,22 +111,8 @@ function ThemeButton({ theme, onToggle }: { theme: string; onToggle: () => void 
 }
 
 function Footer() {
-  const { email, signOut } = useAuth()
   return (
     <div className="space-y-2 border-t border-slate-200 px-5 py-3 text-xs text-slate-400 dark:border-[#2c2e32] dark:text-slate-500">
-      {authEnabled && email && (
-        <div className="flex items-center justify-between gap-2">
-          <span className="truncate" title={email}>
-            {email}
-          </span>
-          <button
-            onClick={signOut}
-            className="shrink-0 rounded border border-slate-300 px-2 py-0.5 font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-          >
-            Salir
-          </button>
-        </div>
-      )}
       <p>H_TOPOGRAFÍA · datos IGAC · SIRGAS</p>
     </div>
   )
