@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer, CircleMarker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import type { LatLngBounds } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { BaseLayers, FullscreenButton } from '../components/MapLayers'
 import { PageHeader, Card, TextInput } from '../components/ui'
 import { PlaceSearch } from '../components/PlaceSearch'
 import { LocateButton } from '../components/LocateButton'
@@ -124,9 +125,10 @@ export default function PassiveNetworkPage() {
       )}
 
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[1fr_20rem] lg:items-start">
-        <div className="order-2 h-[58vh] min-h-80 overflow-hidden rounded-xl border border-slate-200 sm:h-[32rem] lg:order-1 lg:row-span-2 dark:border-slate-800">
+        <div className="order-2 h-[58vh] min-h-80 overflow-hidden rounded-xl border border-slate-200 sm:h-[36rem] lg:order-1 lg:row-span-2 lg:h-[calc(100vh-15rem)] lg:min-h-[32rem] dark:border-slate-800">
           <MapContainer center={COLOMBIA_CENTER} zoom={6} style={{ height: '100%', width: '100%' }}>
-            <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap" />
+            <BaseLayers />
+            <FullscreenButton />
             <FitColombia />
             <FlyTo target={flyTarget} />
             <BoundsWatcher onBounds={setBounds} />
@@ -137,7 +139,7 @@ export default function PassiveNetworkPage() {
                 center={[v.lat, v.lon]}
                 radius={4}
                 pathOptions={{
-                  color: v.materializado ? '#111318' : '#9ca3af',
+                  color: '#ffffff',
                   fillColor: v.materializado ? '#111318' : '#9ca3af',
                   fillOpacity: 0.8,
                   weight: 1,
@@ -153,7 +155,7 @@ export default function PassiveNetworkPage() {
               <CircleMarker
                 center={[point.lat, point.lon]}
                 radius={7}
-                pathOptions={{ color: '#dc2626', fillColor: '#dc2626', fillOpacity: 0.5 }}
+                pathOptions={{ color: '#ffffff', fillColor: '#dc2626', fillOpacity: 0.9, weight: 2 }}
               />
             )}
           </MapContainer>

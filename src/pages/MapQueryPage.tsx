@@ -1,24 +1,22 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   MapContainer,
-  TileLayer,
   CircleMarker,
   Popup,
-  LayersControl,
   useMap,
   useMapEvents,
 } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
+import { BaseLayers, FullscreenButton } from '../components/MapLayers'
+import { StationMarkers, NetworkLegend } from '../components/StationMarkers'
+import { useLatestData } from '../lib/useLatestData'
 import { PageHeader, Card, Field, TextInput, Select, Button } from '../components/ui'
 import { PlaceSearch } from '../components/PlaceSearch'
 import { LocateButton } from '../components/LocateButton'
-import { STATIONS, ACTIVE_STATIONS, type GnssStation } from '../data/stations'
+import { STATIONS, ACTIVE_STATIONS } from '../data/stations'
 import { nearestStations, type LatLon } from '../lib/geodesy'
-import { project } from '../lib/coords'
-import { formatDms } from '../lib/format'
 import { COLOMBIA_CENTER, COLOMBIA_BOUNDS } from '../lib/colombia'
 
-const ORDER_COLOR = ['#111318', '#8b93a2'] // 0 = tinta · 1 = gris
 
 const DEPARTMENTS = [...new Set(STATIONS.map((s) => s.department))].filter(Boolean).sort()
 
@@ -46,6 +44,7 @@ function FitColombia() {
 
 export default function MapQueryPage() {
   const [point, setPoint] = useState<LatLon | null>(null)
+  const latest = useLatestData(STATIONS)
   const [place, setPlace] = useState<{ lat: number; lon: number; label: string } | null>(null)
   const [flyTarget, setFlyTarget] = useState<LatLon | null>(null)
   const [latInput, setLatInput] = useState('')
@@ -96,58 +95,22 @@ export default function MapQueryPage() {
 
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[1fr_20rem] lg:items-start">
         {/* Mapa */}
-        <div className="order-2 h-[58vh] min-h-80 overflow-hidden rounded-xl border border-slate-200 sm:h-[32rem] lg:order-1 lg:row-span-3 dark:border-slate-800">
+        <div className="relative order-2 h-[58vh] min-h-80 overflow-hidden rounded-xl border border-slate-200 sm:h-[36rem] lg:order-1 lg:row-span-3 lg:h-[calc(100vh-15rem)] lg:min-h-[32rem] dark:border-slate-800">
           <MapContainer center={COLOMBIA_CENTER} zoom={6} style={{ height: '100%', width: '100%' }}>
-            <LayersControl position="topright">
-              <LayersControl.BaseLayer checked name="OpenStreetMap">
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-              </LayersControl.BaseLayer>
-              <LayersControl.BaseLayer name="Satélite (Esri)">
-                <TileLayer
-                  attribution='Imagery &copy; Esri, Maxar, Earthstar Geographics'
-                  url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                  maxZoom={19}
-                />
-              </LayersControl.BaseLayer>
-              <LayersControl.BaseLayer name="Relieve (OpenTopoMap)">
-                <TileLayer
-                  attribution='&copy; OpenTopoMap (CC-BY-SA)'
-                  url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
-                  maxZoom={17}
-                />
-              </LayersControl.BaseLayer>
-            </LayersControl>
+            <BaseLayers />
+            <FullscreenButton />
 
             <FitColombia />
             <FlyTo target={flyTarget} />
             <ClickHandler onPick={(p) => setQuery(p)} />
 
-            {visible.map((s) => (
-              <CircleMarker
-                key={s.id}
-                center={[s.lat, s.lon]}
-                radius={s.status === 'active' ? 6 : 4}
-                pathOptions={{
-                  color: ORDER_COLOR[s.order],
-                  fillColor: ORDER_COLOR[s.order],
-                  fillOpacity: s.status === 'active' ? 0.85 : 0.25,
-                  weight: 1,
-                }}
-              >
-                <Popup>
-                  <StationPopup s={s} />
-                </Popup>
-              </CircleMarker>
-            ))}
+            <StationMarkers stations={visible} latest={latest} from={point} />
 
             {place && (
               <CircleMarker
                 center={[place.lat, place.lon]}
                 radius={7}
-                pathOptions={{ color: '#7c3aed', fillColor: '#7c3aed', fillOpacity: 0.4 }}
+                pathOptions={{ color: '#ffffff', fillColor: '#7c3aed', fillOpacity: 0.85, weight: 2 }}
               >
                 <Popup>{place.label}</Popup>
               </CircleMarker>
@@ -157,7 +120,7 @@ export default function MapQueryPage() {
               <CircleMarker
                 center={[point.lat, point.lon]}
                 radius={8}
-                pathOptions={{ color: '#dc2626', fillColor: '#dc2626', fillOpacity: 0.5 }}
+                pathOptions={{ color: '#ffffff', fillColor: '#dc2626', fillOpacity: 0.9, weight: 2 }}
               >
                 <Popup>
                   Punto de consulta
@@ -167,6 +130,7 @@ export default function MapQueryPage() {
               </CircleMarker>
             )}
           </MapContainer>
+          <NetworkLegend point={!!point} inactive />
         </div>
 
         {/* Consulta: buscar lugar, mi ubicación, coordenadas */}
@@ -272,8 +236,6 @@ export default function MapQueryPage() {
 
 function Legend() {
   const items = [
-    ['#111318', 'Orden 0'],
-    ['#8b93a2', 'Orden 1'],
     ['#dc2626', 'Punto de consulta'],
     ['#7c3aed', 'Lugar buscado'],
   ] as const
@@ -289,45 +251,3 @@ function Legend() {
   )
 }
 
-function StationPopup({ s }: { s: GnssStation }) {
-  return (
-    <div className="text-xs leading-relaxed">
-      <strong>
-        {s.id} — {s.name}, {s.department}
-      </strong>
-      <br />
-      Orden {s.order} · {s.status === 'active' ? 'activa' : 'inactiva'}
-      {s.networks.length > 0 && ` · ${s.networks.join(', ')}`}
-      <br />
-      {formatDms(s.lat, 'lat')}
-      <br />
-      {formatDms(s.lon, 'lon')}
-      <br />
-      {(() => {
-        const p = project(s.lat, s.lon, 'EPSG:9377')
-        return (
-          <>
-            CTM12: {p.easting.toFixed(2)} E · {p.northing.toFixed(2)} N
-            <br />
-          </>
-        )
-      })()}
-      {s.heightM != null && <>h = {s.heightM} m · </>}
-      {s.domes ? `DOMES ${s.domes}` : 'sin DOMES'}
-      {s.receiver && (
-        <>
-          <br />
-          {s.receiver} / {s.antenna}
-        </>
-      )}
-      <br />
-      <a href={`#/estacion?station=${s.id}`} style={{ color: '#2057d4', fontWeight: 600 }}>
-        Ficha de la estación →
-      </a>
-      <br />
-      <a href={`#/rinex?station=${s.id}`} style={{ color: '#2057d4', fontWeight: 600 }}>
-        Descargar RINEX →
-      </a>
-    </div>
-  )
-}

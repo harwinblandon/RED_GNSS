@@ -78,6 +78,64 @@ body {
   font: inherit;
 }
 
+/* Vértices de la red (StationMarkers.tsx) */
+.station-icon {
+  background: none;
+  border: 0;
+}
+.station-icon svg {
+  display: block;
+  filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.45));
+  transition: transform 120ms;
+}
+.station-icon:hover svg {
+  transform: scale(1.2);
+}
+.leaflet-tooltip.station-label {
+  padding: 1px 4px;
+  border: 1.5px solid #14532d;
+  border-radius: 3px;
+  background: #fff;
+  color: #14532d;
+  font: 700 11px/1.2 var(--font-sans, system-ui);
+  letter-spacing: 0.02em;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
+}
+.leaflet-tooltip.station-label::before {
+  display: none;
+}
+
+/* Mapa a pantalla completa (FullscreenButton en MapLayers.tsx) */
+.map-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2000 !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  margin: 0 !important;
+}
+.leaflet-fullscreen-btn {
+  position: absolute;
+  top: 80px;
+  left: 10px;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  background: #fff;
+  color: #23262d;
+  cursor: pointer;
+  background-clip: padding-box;
+}
+.leaflet-fullscreen-btn:hover {
+  background-color: #f4f4f5;
+}
+
 /* Impresión: solo el reporte, sin cromo de la aplicación */
 @media print {
   aside,

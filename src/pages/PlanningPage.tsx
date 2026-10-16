@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   MapContainer,
-  TileLayer,
   CircleMarker,
   Polyline,
-  Popup,
   useMap,
   useMapEvents,
 } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
+import { BaseLayers, FullscreenButton } from '../components/MapLayers'
 import { PageHeader, Card, Field, TextInput, Select, DataRow, Button } from '../components/ui'
 import { PlaceSearch } from '../components/PlaceSearch'
 import { LocateButton } from '../components/LocateButton'
 import { SatelliteWindow } from '../components/SatelliteWindow'
+import { StationMarkers, NetworkLegend } from '../components/StationMarkers'
 import { ACTIVE_STATIONS } from '../data/stations'
 import { nearestStations, type LatLon } from '../lib/geodesy'
 import { loadSnapshot, getCached } from '../lib/stationStatus'
@@ -86,6 +86,8 @@ export default function PlanningPage() {
     () => candidates.filter((c) => !excluded.has(c.station.id)).slice(0, nStations),
     [candidates, excluded, nStations],
   )
+
+  const selectedIds = useMemo(() => new Set(selected.map((s) => s.station.id)), [selected])
 
   const plan = useMemo(() => {
     if (!point || selected.length === 0) return null
@@ -206,36 +208,33 @@ export default function PlanningPage() {
         )}
 
         {/* 2. Mapa */}
-        <div className="order-2 h-[52vh] min-h-72 overflow-hidden rounded-xl border border-slate-200 sm:h-[28rem] lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:h-full lg:min-h-[36rem] print:hidden dark:border-slate-800">
+        <div className="relative order-2 h-[52vh] min-h-72 overflow-hidden rounded-xl border border-slate-200 sm:h-[28rem] lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:h-full lg:min-h-[36rem] print:hidden dark:border-slate-800">
           <MapContainer center={COLOMBIA_CENTER} zoom={6} style={{ height: '100%', width: '100%' }}>
-              <TileLayer url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap" />
+              <BaseLayers />
+              <FullscreenButton />
               <FitColombia />
               <FlyTo target={flyTarget} />
               <MapClick onPick={(p) => setQueryPoint(p)} />
 
-              {ACTIVE_STATIONS.map((s) => (
-                <CircleMarker
-                  key={s.id}
-                  center={[s.lat, s.lon]}
-                  radius={3}
-                  pathOptions={{ color: '#8b93a2', fillColor: '#8b93a2', fillOpacity: 0.6, weight: 0 }}
-                />
-              ))}
+              <StationMarkers
+                stations={ACTIVE_STATIONS}
+                latest={latency}
+                highlight={selectedIds}
+                from={point}
+              />
 
               {selected.map(({ station }) =>
                 point ? (
                   <div key={station.id}>
+                    {/* halo blanco: la línea se lee sobre calles y sobre satélite */}
+                    <Polyline
+                      positions={[[point.lat, point.lon], [station.lat, station.lon]]}
+                      pathOptions={{ color: '#ffffff', weight: 4, opacity: 0.8 }}
+                    />
                     <Polyline
                       positions={[[point.lat, point.lon], [station.lat, station.lon]]}
                       pathOptions={{ color: '#111318', weight: 1.5, dashArray: '4 3' }}
                     />
-                    <CircleMarker
-                      center={[station.lat, station.lon]}
-                      radius={5}
-                      pathOptions={{ color: '#111318', fillColor: '#4b5563', fillOpacity: 0.95 }}
-                    >
-                      <Popup>{station.id} — {station.name}</Popup>
-                    </CircleMarker>
                   </div>
                 ) : null,
               )}
@@ -244,10 +243,11 @@ export default function PlanningPage() {
                 <CircleMarker
                   center={[point.lat, point.lon]}
                   radius={7}
-                  pathOptions={{ color: '#dc2626', fillColor: '#dc2626', fillOpacity: 0.5 }}
+                  pathOptions={{ color: '#ffffff', fillColor: '#dc2626', fillOpacity: 0.9, weight: 2 }}
                 />
               )}
             </MapContainer>
+            <NetworkLegend highlight={selected.length > 0} />
         </div>
 
         {/* 5. Resultado */}
