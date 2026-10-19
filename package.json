@@ -10,8 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "exceljs": "^4.4.0",
     "fflate": "^0.8.3",
     "geographiclib-geodesic": "^2.2.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.9",
     "leaflet": "^1.9.4",
     "proj4": "^2.21.0",
     "react": "^19.2.8",

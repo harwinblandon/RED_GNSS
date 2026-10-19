@@ -56,16 +56,20 @@ src/
   app/         router (lazy), layout, navegación, tema
   components/  UI compartida, iconos, PlaceSearch, StationPicker
   lib/         gpsTime · igacNorms · geodesy · coords · geocoding · rinex ·
-               stationStatus · ephemeris · planning · format
+               stationStatus · ephemeris · planning · format · satVisibility ·
+               heights
   data/        stations.ts  (GENERADO — ver scripts/)
   pages/       una por ruta
 scripts/
   build-stations.py    regenera src/data/stations.ts
   build-vertices.py    regenera public/vertices.json (red pasiva, ~10 k mojones)
   build-vemos.py       regenera public/vemos2022.json (subconjunto Colombia del modelo VEMOS2022)
-  status-snapshot.py   regenera public/stations-status.json
+  build-heights.py     regenera public/geoid/*.json (QGeoidCOL2023, GEOCOL2004) y
+                       public/leveling.json (red vertical; correr después de build-vertices.py)
+  status-snapshot.py   regenera public/stations-status.json y stations-history.json
+  gnss-orbits.py       regenera public/gnss-orbits.json (TLE GNSS de CelesTrak)
 .github/workflows/
-  stations-status.yml  corre status-snapshot.py a diario y hace commit
+  stations-status.yml  corre status-snapshot.py y gnss-orbits.py a diario y hace commit
 ```
 
 ### Datos de estaciones

@@ -72,7 +72,7 @@ function looksNumeric(cells: string[]): boolean {
 const PROJECTED_PREFIXES = ['EPSG:', 'UTM']
 const isProjected = (s: InputSystem) => PROJECTED_PREFIXES.some((p) => s.startsWith(p))
 
-export function parseCoordinates(text: string, system: InputSystem = 'auto'): ParseResult {
+export function parseCoordinates(text: string, system: InputSystem = 'auto', idPrefix = 'P'): ParseResult {
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
   const errors: string[] = []
   const points: ParsedPoint[] = []
@@ -95,7 +95,7 @@ export function parseCoordinates(text: string, system: InputSystem = 'auto'): Pa
         continue
       }
       points.push({
-        id: id ?? `P${points.length + 1}`,
+        id: id ?? `${idPrefix}${points.length + 1}`,
         lat: p.lat,
         lon: p.lon,
         h: p.rest[0] ?? 0,
@@ -119,7 +119,7 @@ export function parseCoordinates(text: string, system: InputSystem = 'auto'): Pa
     }
     const hasId =
       cells.length >= (crs ? 3 : 4) || !Number.isFinite(num(cells[0]))
-    const id = hasId ? cells[0] : `P${points.length + 1}`
+    const id = hasId ? cells[0] : `${idPrefix}${points.length + 1}`
     const vals = (hasId ? cells.slice(1) : cells).map(num)
     if (vals.length < minCells || vals.some((v) => !Number.isFinite(v))) {
       errors.push(`Fila ${i + 1}: valores no numéricos.`)

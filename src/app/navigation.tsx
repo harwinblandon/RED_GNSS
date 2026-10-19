@@ -9,6 +9,7 @@ import {
   InfoIcon,
   MapIcon,
   MarkerIcon,
+  MountainIcon,
   OrbitIcon,
   SatelliteIcon,
   SignalIcon,
@@ -100,6 +101,13 @@ export const NAV_ITEMS: NavItem[] = [
     description:
       'Propaga coordenadas entre épocas con VEMOS2022 (SIRGAS). Un punto o un CSV/TXT → geográficas, geocéntricas y planas en la época destino.',
     icon: ClockIcon,
+  },
+  {
+    path: '/alturas',
+    label: 'Alturas (QGeoidCOL2023)',
+    description:
+      'De altura elipsoidal GNSS a altura física con el cuasigeoide oficial QGeoidCOL2023, ajustada a la red de nivelación del IGAC con las placas cercanas.',
+    icon: MountainIcon,
   },
   {
     path: '/calendario-gps',

@@ -58,6 +58,25 @@ export default function AboutPage() {
             ) — modelo de velocidades para la transformación de coordenadas entre épocas.
           </li>
           <li>
+            <ExternalLink href="https://redgeodesica.igac.gov.co/documentos/QGeoidCOL2023.txt">
+              QGeoidCOL2023
+            </ExternalLink>{' '}
+            (IGAC / DGFI-TUM; Liu et al. 2024,{' '}
+            <ExternalLink href="https://doi.org/10.1186/s40623-024-01981-1">
+              doi:10.1186/s40623-024-01981-1
+            </ExternalLink>
+            ; CC BY 4.0) — cuasigeoide oficial (Resolución IGAC 515 de 2026). Red Vertical
+            (nivelación) del IGAC para el ajuste local, y{' '}
+            <ExternalLink href="https://www.isgeoid.polimi.it/Geoid/America/Colombia/colombia04_g.html">
+              GEOCOL2004
+            </ExternalLink>{' '}
+            (International Service for the Geoid) como referencia de transición.
+          </li>
+          <li>
+            <ExternalLink href="https://celestrak.org/">CelesTrak</ExternalLink> — elementos
+            orbitales GNSS para la ventana horaria (PDOP) de la planeación.
+          </li>
+          <li>
             <ExternalLink href="https://geodesy.unr.edu/">
               Nevada Geodetic Laboratory (UNR)
             </ExternalLink>{' '}
@@ -72,13 +91,14 @@ export default function AboutPage() {
             búsqueda de lugares; capas base también de{' '}
             <ExternalLink href="https://www.esri.com/">Esri</ExternalLink> y{' '}
             <ExternalLink href="https://opentopomap.org/">OpenTopoMap</ExternalLink>{' '}
-            (CC-BY-SA).
+            (CC-BY-SA) y{' '}
+            <ExternalLink href="https://carto.com/attributions">CARTO</ExternalLink>.
           </li>
         </ul>
         <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
           Cada fuente conserva sus derechos y condiciones de uso; los enlaces llevan a
           la información original. Construida con software libre (React, Leaflet,
-          proj4, GeographicLib, fflate).
+          proj4, GeographicLib, fflate, satellite.js).
         </p>
       </Card>
 

@@ -149,3 +149,11 @@ export const ClipboardIcon = (p: IconProps) => (
     <path d="M9 12h6M9 16h4" />
   </Base>
 )
+
+/** Montaña con cota: alturas físicas / nivelación. */
+export const MountainIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="m3 19 6.5-11 4 6.5 2-3L21 19z" />
+    <path d="M17 4v4M15 6h4" />
+  </Base>
+)
