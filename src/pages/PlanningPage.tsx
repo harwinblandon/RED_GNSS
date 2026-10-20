@@ -304,6 +304,7 @@ function PlanReport({ plan }: { plan: ReturnType<typeof buildPlan> }) {
                 <th className="py-2 pr-3 font-medium">Orden</th>
                 <th className="py-2 pr-3 font-medium">Línea base</th>
                 <th className="py-2 pr-3 font-medium">Azimut</th>
+                <th className="py-2 pr-3 font-medium">Rastreo Res. 643</th>
                 <th className="py-2 pr-3 font-medium">Rastreo (alturas)</th>
                 <th className="py-2 font-medium">Último dato</th>
               </tr>
@@ -316,6 +317,7 @@ function PlanReport({ plan }: { plan: ReturnType<typeof buildPlan> }) {
                   <td className="tabular py-2 pr-3">{s.station.order}</td>
                   <td className="tabular py-2 pr-3">{s.baselineKm.toFixed(2)} km</td>
                   <td className="tabular py-2 pr-3">{s.azimuthDeg.toFixed(0)}°</td>
+                  <td className="tabular py-2 pr-3 font-medium">{Math.round(s.res643Minutes)} min</td>
                   <td className="tabular py-2 pr-3">{Math.round(s.alturasMinutes)} min</td>
                   <td className="tabular py-2 text-slate-600 dark:text-slate-400">{s.lastData ?? '—'}</td>
                 </tr>
@@ -342,6 +344,10 @@ function PlanReport({ plan }: { plan: ReturnType<typeof buildPlan> }) {
           value={`${formatMinutes(plan.targetOrder.minMinutes)} – ${formatMinutes(plan.targetOrder.maxMinutes)}`}
         />
         <DataRow
+          label="Resolución 643/2018 · 65 + 3·(d − 10), estación más lejana (L1/L2)"
+          value={`${Math.round(plan.res643GoverningMinutes)} min · ${formatMinutes(plan.res643GoverningMinutes)}`}
+        />
+        <DataRow
           label={`Guía de alturas (línea base más larga, ${plan.excellentConfig ? '3' : '5'} min/km)`}
           value={`${Math.round(plan.alturasGoverningMinutes)} min · ${formatMinutes(plan.alturasGoverningMinutes)}`}
         />
@@ -356,7 +362,7 @@ function PlanReport({ plan }: { plan: ReturnType<typeof buildPlan> }) {
         lat={plan.point.lat}
         lon={plan.point.lon}
         date={plan.date}
-        durationMin={Math.max(plan.targetOrder.minMinutes, plan.alturasGoverningMinutes)}
+        durationMin={Math.max(plan.targetOrder.minMinutes, plan.res643GoverningMinutes, plan.alturasGoverningMinutes)}
       />
 
       <Card>

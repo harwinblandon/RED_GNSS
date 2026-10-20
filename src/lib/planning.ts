@@ -5,7 +5,7 @@
  */
 import type { GnssStation } from '../data/stations'
 import { geodesicInverse } from './geodesy'
-import { occupationTimeAlturas, orderSpec, type OrderSpec } from './igacNorms'
+import { occupationTimeAlturas, occupationTimeRes643, orderSpec, type OrderSpec } from './igacNorms'
 import { project } from './coords'
 import { ephemerisFor } from './ephemeris'
 import { formatDms } from './format'
@@ -23,6 +23,8 @@ export interface PlanStation {
   azimuthDeg: number
   /** Tiempo de rastreo por el modelo de la Guía de alturas para esta línea base. */
   alturasMinutes: number
+  /** Tiempo de rastreo por la Res. IGAC 643/2018 (doble frecuencia) para esta distancia. */
+  res643Minutes: number
   /** Fecha del último dato conocido (del snapshot / verificación), si la hay. */
   lastData: string | null
   ctm12: { easting: number; northing: number }
@@ -43,6 +45,8 @@ export interface Plan {
   stations: PlanStation[]
   /** Tiempo de ocupación gobernante (modelo alturas): la línea base más larga manda. */
   alturasGoverningMinutes: number
+  /** Tiempo gobernante por la Res. 643/2018 (estación más lejana). */
+  res643GoverningMinutes: number
   ephemeris: ReturnType<typeof ephemerisFor>
 }
 
@@ -70,6 +74,7 @@ export function buildPlan(
       baselineKm,
       azimuthDeg: g.azimuthDeg,
       alturasMinutes: occupationTimeAlturas(baselineKm, { excellentConfig }).minutes,
+      res643Minutes: occupationTimeRes643(baselineKm).minutes,
       lastData: opts.latencyLookup?.(station.id) ?? null,
       ctm12: { easting: p.easting, northing: p.northing },
       rinexUrl: rinexDeepLink(station.id, station.tId),
@@ -98,6 +103,7 @@ export function buildPlan(
     excellentConfig,
     stations: planStations,
     alturasGoverningMinutes,
+    res643GoverningMinutes: planStations.reduce((m, s) => Math.max(m, s.res643Minutes), 0),
     ephemeris: ephemerisFor(new Date(Date.UTC(y, (m || 1) - 1, d || 1))),
   }
 }
@@ -113,14 +119,14 @@ export function planToCsv(plan: Plan): string {
   const head = [
     'estacion', 'municipio', 'departamento', 'orden', 'operador',
     'lat', 'lon', 'altura_elip_m', 'ctm12_e', 'ctm12_n',
-    'linea_base_km', 'azimut_deg', 'rastreo_alturas_min', 'ultimo_dato', 'domes', 'rinex',
+    'linea_base_km', 'azimut_deg', 'rastreo_res643_min', 'rastreo_alturas_min', 'ultimo_dato', 'domes', 'rinex',
   ]
   const rows = plan.stations.map((s) =>
     [
       s.station.id, s.station.name, s.station.department, s.station.order, s.station.operator,
       s.station.lat, s.station.lon, s.station.heightM ?? '',
       s.ctm12.easting.toFixed(3), s.ctm12.northing.toFixed(3),
-      s.baselineKm.toFixed(3), s.azimuthDeg.toFixed(1), Math.round(s.alturasMinutes),
+      s.baselineKm.toFixed(3), s.azimuthDeg.toFixed(1), Math.round(s.res643Minutes), Math.round(s.alturasMinutes),
       s.lastData ?? '', s.station.domes ?? '', s.rinexUrl,
     ]
       .map(csvCell)

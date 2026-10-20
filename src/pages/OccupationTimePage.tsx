@@ -5,22 +5,26 @@ import {
   CAPTURE_PARAMS,
   ORDER_SPECS,
   occupationTimeAlturas,
+  occupationTimeRes643,
   orderSpec,
   type NormMode,
 } from '../lib/igacNorms'
 import { formatMinutes } from '../lib/format'
 
 export default function OccupationTimePage() {
-  const [mode, setMode] = useState<NormMode>('alturas')
+  const [mode, setMode] = useState<NormMode>('res643')
 
   return (
     <div>
       <PageHeader
         title="Tiempo de ocupación"
-        subtitle="Dos marcos normativos del IGAC para planear el tiempo mínimo de rastreo en estático diferencial. Elige el que corresponda al objetivo del levantamiento."
+        subtitle="Marcos normativos del IGAC para planear el tiempo mínimo de rastreo en estático diferencial. Elige el que corresponda al objetivo del levantamiento."
       />
 
       <div className="mb-6 inline-flex rounded-lg border border-slate-300 p-1 dark:border-slate-700">
+        <ModeTab active={mode === 'res643'} onClick={() => setMode('res643')}>
+          Resolución 643/2018 (65 + 3·(d − 10))
+        </ModeTab>
         <ModeTab active={mode === 'alturas'} onClick={() => setMode('alturas')}>
           Guía de alturas (15 + 5·d)
         </ModeTab>
@@ -29,7 +33,7 @@ export default function OccupationTimePage() {
         </ModeTab>
       </div>
 
-      {mode === 'alturas' ? <AlturasCalculator /> : <Res1468Reference />}
+      {mode === 'res643' ? <Res643Calculator /> : mode === 'alturas' ? <AlturasCalculator /> : <Res1468Reference />}
     </div>
   )
 }
@@ -54,6 +58,111 @@ function ModeTab({
     >
       {children}
     </button>
+  )
+}
+
+function Res643Calculator() {
+  const [dist, setDist] = useState('25')
+  const [single, setSingle] = useState(false)
+  const d = Number(dist.replace(',', '.'))
+  const ok = Number.isFinite(d) && d >= 0
+  const r = ok ? occupationTimeRes643(d, { singleFrequency: single }) : null
+  const alt = ok ? occupationTimeAlturas(d) : null
+  const o4 = orderSpec(4)
+  const table = [0, 15, 20, 25, 30, 40, 50, 60, 70, 80]
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
+      <Card>
+        <div className="space-y-4">
+          <Field label="Distancia a la estación o vértice (km)" hint="Desde la estación MAGNA-ECO o el vértice de la red pasiva hasta el punto a posicionar.">
+            <TextInput type="number" min={0} step={0.1} value={dist} onChange={(e) => setDist(e.target.value)} />
+          </Field>
+          <Field label="Equipo">
+            <Select value={single ? 'L1' : 'L1L2'} onChange={(e) => setSingle(e.target.value === 'L1')}>
+              <option value="L1L2">Doble frecuencia / multifrecuencia (L1/L2)</option>
+              <option value="L1">Frecuencia sencilla (L1)</option>
+            </Select>
+          </Field>
+        </div>
+      </Card>
+
+      <Card>
+        {r ? (
+          <div>
+            <p className="text-sm text-slate-600 dark:text-slate-400">Tiempo mínimo de rastreo</p>
+            <p className="mt-1 text-4xl font-bold tabular text-brand-600 dark:text-brand-400">{Math.round(r.minutes)} min</p>
+            <p className="tabular text-sm text-slate-500">{formatMinutes(r.minutes)}</p>
+            <div className="mt-4">
+              <DataRow
+                label="Fórmula"
+                value={single ? `2 · [65 + 3 · (${d} − 10)]` : `65 + 3 · (${d} − 10)`}
+              />
+              <DataRow label="Base (≤ 10 km)" value={`${single ? 130 : 65} min`} />
+              <DataRow label="Adicional por distancia" value={`${Math.round(r.extraMinutes * (single ? 2 : 1))} min`} />
+              <DataRow label="Distancia ≤ 80 km" value={r.exceeds80 ? '⚠ supera lo permitido' : 'ok'} />
+              <DataRow
+                label={`Rango Res. 1468/2021 para orden 4 (${formatMinutes(o4.minMinutes)} – ${formatMinutes(o4.maxMinutes)})`}
+                value={r.minutes < o4.minMinutes ? 'por debajo' : r.minutes > o4.maxMinutes ? 'por encima' : 'dentro del rango'}
+              />
+              {alt && <DataRow label="Comparación: Guía de alturas (15 + 5·d)" value={`${Math.round(alt.minutes)} min`} />}
+            </div>
+            {r.exceeds80 && (
+              <p className="mt-3 rounded-lg bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+                La norma pide evitar rastreos a más de 80 km del punto geodésico. Si no hay alternativa, traslada
+                coordenadas desde un punto intermedio o amplía el tiempo de rastreo.
+              </p>
+            )}
+            <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
+              Los tiempos suponen condiciones ideales: horizonte despejado, máscara de elevación y DOP adecuados. Revisa la
+              ventana PDOP en Planeación de sesión.
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm text-slate-500">Ingresa una distancia válida.</p>
+        )}
+      </Card>
+
+      <div className="lg:col-span-2">
+        <Card>
+          <h4 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-200">Tiempos de referencia por distancia</h4>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 text-left text-slate-500 dark:border-slate-800">
+                  <th className="py-2 pr-4 font-medium">Distancia (km)</th>
+                  {table.map((k) => (
+                    <th key={k} className="py-2 pr-3 text-right font-medium tabular">{k === 0 ? '≤ 10' : k}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="tabular">
+                {(
+                  [
+                    ['L1/L2', false],
+                    ['L1', true],
+                  ] as const
+                ).map(([label, sf]) => (
+                  <tr key={label} className="border-b border-slate-100 last:border-0 dark:border-slate-800">
+                    <td className="py-2 pr-4 font-sans font-medium text-slate-900 dark:text-slate-100">{label}</td>
+                    {table.map((k) => (
+                      <td key={k} className="py-2 pr-3 text-right text-slate-700 dark:text-slate-300">
+                        {formatMinutes(occupationTimeRes643(k === 0 ? 10 : k, { singleFrequency: sf }).minutes)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+          Fuente: Resolución IGAC 643 de 2018, especificaciones técnicas de levantamiento topográfico, Anexo 2, numeral 8.1
+          (puntos topográficos base posicionados desde la red MAGNA-ECO o la red pasiva). Es la fórmula de la{' '}
+          <ExternalLink href="https://estadoestacionesgnss.igac.gov.co/rastreo.html">calculadora de tiempos de rastreo del IGAC</ExternalLink>.
+        </p>
+      </div>
+    </div>
   )
 }
 

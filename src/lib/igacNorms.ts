@@ -5,11 +5,48 @@
  * Fuentes:
  *  - Resolución IGAC 1468 de 2021 — "Red Geodésica Nacional".
  *    https://redgeodesica.igac.gov.co/documentos/resolucion_1468_de_2021.pdf
+ *  - Resolución IGAC 643 de 2018 — especificaciones técnicas de levantamiento
+ *    topográfico, Anexo 2, numeral 8.1 (puntos topográficos base GNSS). Es la
+ *    fórmula que usa la calculadora oficial del IGAC:
+ *    https://estadoestacionesgnss.igac.gov.co/rastreo.html
  *  - Guía metodológica para la obtención de alturas a partir de datos GNSS (IGAC, S. W. León).
  *    https://redgeodesica.igac.gov.co/documentos/GUIA_METODOLOGICA_PARA_LA_OBTENCION_DE_ALTURAS_A_PARTIR_DE%20DATOS_GNSS_SWLEON.pdf
  */
 
-export type NormMode = 'alturas' | 'res1468'
+export type NormMode = 'res643' | 'alturas' | 'res1468'
+
+/* -------------------------------------------------------------------------- */
+/*  Resolución 643 de 2018  (t = 65 + 3·(d − 10))                             */
+/* -------------------------------------------------------------------------- */
+
+export interface Res643Result {
+  minutes: number
+  /** Minutos adicionales por distancia: 3 · (d − 10), nunca negativo. */
+  extraMinutes: number
+  singleFrequency: boolean
+  /** La distancia supera los 80 km (la norma pide evitarlo). */
+  exceeds80: boolean
+}
+
+/**
+ * Tiempo de rastreo para posicionar un punto desde la red MAGNA-ECO o la red
+ * pasiva (Res. IGAC 643/2018, Anexo 2, num. 8.1):
+ *  - Doble frecuencia (L1/L2): t = 65 min + 3 min · (d − 10), d en km, d < 80 km.
+ *    Para d ≤ 10 km el término adicional es 0 (65 min).
+ *  - Frecuencia sencilla (L1): el doble.
+ *  - Evitar d > 80 km; si es inevitable, trasladar coordenadas o ampliar el tiempo.
+ */
+export function occupationTimeRes643(distanceKm: number, opts: { singleFrequency?: boolean } = {}): Res643Result {
+  const d = Math.max(0, distanceKm)
+  const extraMinutes = 3 * Math.max(0, d - 10)
+  const base = 65 + extraMinutes
+  return {
+    minutes: opts.singleFrequency ? 2 * base : base,
+    extraMinutes,
+    singleFrequency: !!opts.singleFrequency,
+    exceeds80: d > 80,
+  }
+}
 
 /* -------------------------------------------------------------------------- */
 /*  Modelo 1: Guía metodológica de alturas GNSS  (t = 15 + k·d)               */
