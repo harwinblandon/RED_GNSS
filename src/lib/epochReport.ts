@@ -125,7 +125,7 @@ export function buildEpochReport(r: ReportInput): string {
     '  dentro de Colombia ITRF2020 ≈ MAGNA-SIRGAS a nivel de centímetro.',
     '',
     'ÉPOCAS',
-    `  Origen ............. ${r.fromEpoch.toFixed(4)}   (MAGNA-SIRGAS 2018.4 si aplica; Res. IGAC 715/2018)`,
+    `  Origen ............. ${r.fromEpoch.toFixed(4)}   (MAGNA-SIRGAS 2018.0 si aplica; Res. IGAC 715/2018)`,
     `  Destino ........... ${r.toEpoch.toFixed(4)}${/^\d{4}-\d{2}-\d{2}$/.test(r.toInput.trim()) ? `   (fecha ${r.toInput.trim()} → año decimal)` : ''}`,
     `  Intervalo Δt ....... ${sgn(dt, 4)} años`,
     '',

@@ -1,5 +1,5 @@
 /**
- * VEMOS2022 — modelo de velocidades de SIRGAS para epoch transformations.
+ * Modelos de velocidades VEMOS de SIRGAS (2017 y 2022) para el cambio de época.
  *
  * Rejilla 1°×1° (subconjunto de Colombia) en marco ITRF2020, velocidades
  * horizontales en mm/año. Fuente: DGFI-TUM / SIRGAS
@@ -46,37 +46,53 @@ export interface Velocity {
 
 type Node = [lat: number, lon: number, vnMm: number, veMm: number]
 
-let data: { meta: VemosMeta; nodes: Node[]; byKey: Map<string, Node> } | null = null
-let pending: Promise<void> | null = null
+/** Modelos disponibles (rejillas 1°×1° de SIRGAS, subconjunto de Colombia). */
+export type VemosModel = 'VEMOS2022' | 'VEMOS2017'
+export const VEMOS_MODELS: { id: VemosModel; label: string }[] = [
+  { id: 'VEMOS2022', label: 'VEMOS2022 (ITRF2020, 2017.1–2022.0)' },
+  { id: 'VEMOS2017', label: 'VEMOS2017 (ITRF2014, 2014.0–2017.1)' },
+]
+
+interface Loaded {
+  meta: VemosMeta
+  nodes: Node[]
+  byKey: Map<string, Node>
+}
+const loaded = new Map<VemosModel, Loaded>()
+const pending = new Map<VemosModel, Promise<void>>()
 
 const key = (lat: number, lon: number) => `${lat.toFixed(1)},${lon.toFixed(1)}`
 
-async function ensureLoaded(): Promise<void> {
-  if (data) return
-  if (!pending) {
-    pending = fetch(`${import.meta.env.BASE_URL}vemos2022.json`)
+async function ensureLoaded(model: VemosModel): Promise<Loaded> {
+  const have = loaded.get(model)
+  if (have) return have
+  let p = pending.get(model)
+  if (!p) {
+    const file = `${model.toLowerCase()}.json`
+    p = fetch(`${import.meta.env.BASE_URL}${file}`)
       .then((r) => {
-        if (!r.ok) throw new Error(`vemos2022.json: HTTP ${r.status}`)
+        if (!r.ok) throw new Error(`${file}: HTTP ${r.status}`)
         return r.json()
       })
       .then((d: VemosMeta & { grid: Node[] }) => {
         const byKey = new Map<string, Node>()
         for (const n of d.grid) byKey.set(key(n[0], n[1]), n)
-        data = { meta: d, nodes: d.grid, byKey }
+        loaded.set(model, { meta: d, nodes: d.grid, byKey })
       })
+    p.catch(() => pending.delete(model))
+    pending.set(model, p)
   }
-  return pending
+  await p
+  return loaded.get(model)!
 }
 
-export async function loadVemos(): Promise<VemosMeta> {
-  await ensureLoaded()
-  return data!.meta
+export async function loadVemos(model: VemosModel = 'VEMOS2022'): Promise<VemosMeta> {
+  return (await ensureLoaded(model)).meta
 }
 
 /** Velocidad interpolada (bilineal) en un punto; nodo más cercano si está fuera. */
-export async function velocityAt(lat: number, lon: number): Promise<Velocity> {
-  await ensureLoaded()
-  const { byKey, nodes } = data!
+export async function velocityAt(lat: number, lon: number, model: VemosModel = 'VEMOS2022'): Promise<Velocity> {
+  const { byKey, nodes } = await ensureLoaded(model)
 
   const lat0 = Math.floor(lat)
   const lon0 = Math.floor(lon)

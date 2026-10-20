@@ -157,3 +157,12 @@ export const MountainIcon = (p: IconProps) => (
     <path d="M17 4v4M15 6h4" />
   </Base>
 )
+
+/** Documento con marca de verificación: reporte final de coordenadas. */
+export const ReportIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z" />
+    <path d="M14 3v5h5" />
+    <path d="m9 14 2 2 4-4" />
+  </Base>
+)

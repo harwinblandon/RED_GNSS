@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-Regenera `public/vemos2022.json` — subconjunto de Colombia del modelo de
-velocidades VEMOS2022 de SIRGAS.
+Regenera `public/vemos2017.json` y `public/vemos2022.json` — subconjuntos de
+Colombia de los modelos de velocidades VEMOS de SIRGAS.
 
 Uso:  python scripts/build-vemos.py
 
-Fuente: https://www.sirgas.org/fileadmin/docs/VEMOS2022.TXT
-  VEMOS2022 · SIRGAS Analysis Centre at DGFI-TUM · marco ITRF2020 ·
-  intervalo 2017.1–2022.0. Rejilla 1°×1°.
-  Cita: Sánchez L., Drewes H., Kehm A., Seitz M. (2022), J. Geod. Sci. 12(1),
-  92–119, https://doi.org/10.1515/jogs-2022-0138
+Fuentes (SIRGAS Analysis Centre at DGFI-TUM, rejillas 1°×1°):
+  VEMOS2022 · ITRF2020 · 2017.1–2022.0 · Sánchez et al. (2022), J. Geod. Sci.
+    12(1), 92–119, https://doi.org/10.1515/jogs-2022-0138
+  VEMOS2017 · IGS14/ITRF2014 · 2014.0–2017.1 · Drewes & Sánchez (2020),
+    https://doi.org/10.1594/PANGAEA.912350
 
 Columnas del archivo: lat, lon, v_N [m/a], v_E [m/a], σ_N, σ_E
 Salida (compacta): [lat, lon, vN_mm, vE_mm]  (velocidades en mm/año)
@@ -17,8 +17,12 @@ Salida (compacta): [lat, lon, vN_mm, vE_mm]  (velocidades en mm/año)
 from __future__ import annotations
 import datetime, json, re, urllib.request
 
-URL = "https://www.sirgas.org/fileadmin/docs/VEMOS2022.TXT"
-OUT = "public/vemos2022.json"
+MODELS = {
+    "VEMOS2022": dict(url="https://www.sirgas.org/fileadmin/docs/VEMOS2022.TXT", frame="ITRF2020", timespan="2017.1-2022.0",
+                      citation="Sánchez et al. (2022), J. Geod. Sci. 12(1), 92-119, doi:10.1515/jogs-2022-0138"),
+    "VEMOS2017": dict(url="https://www.sirgas.org/fileadmin/docs/VEMOS2017.TXT", frame="IGS14/ITRF2014", timespan="2014.0-2017.1",
+                      citation="Drewes H., Sánchez L. (2020), VEMOS2017, doi:10.1594/PANGAEA.912350"),
+}
 # Recuadro amplio de Colombia (con margen para interpolar en los bordes).
 LAT_MIN, LAT_MAX = -5.0, 15.0
 LON_MIN, LON_MAX = -82.0, -66.0
@@ -26,8 +30,9 @@ LON_MIN, LON_MAX = -82.0, -66.0
 ROW = re.compile(r"^\s*(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d\S*)\s+(-?\d\S*)")
 
 
-def main() -> None:
-    req = urllib.request.Request(URL, headers={"User-Agent": "build-vemos.py"})
+def build(model: str, url: str, frame: str, timespan: str, citation: str) -> None:
+    out = f"public/{model.lower()}.json"
+    req = urllib.request.Request(url, headers={"User-Agent": "build-vemos.py"})
     text = urllib.request.urlopen(req, timeout=60).read().decode("utf-8", "replace")
 
     grid = []
@@ -41,20 +46,21 @@ def main() -> None:
 
     grid.sort(key=lambda r: (r[0], r[1]))
     payload = {
-        "model": "VEMOS2022",
-        "frame": "ITRF2020",
-        "timespan": "2017.1-2022.0",
-        "source": URL,
-        "citation": "Sánchez et al. (2022), J. Geod. Sci. 12(1), 92-119, doi:10.1515/jogs-2022-0138",
+        "model": model,
+        "frame": frame,
+        "timespan": timespan,
+        "source": url,
+        "citation": citation,
         "generated": datetime.date.today().isoformat(),
         "units": "mm/a",
         "fields": ["lat", "lon", "vN", "vE"],
         "grid": grid,
     }
-    with open(OUT, "w", encoding="utf-8", newline="\n") as fh:
+    with open(out, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(payload, fh, ensure_ascii=False, separators=(",", ":"))
-    print(f"[ok] {OUT} — {len(grid)} nodos de la rejilla")
+    print(f"[ok] {out} — {len(grid)} nodos de la rejilla")
 
 
 if __name__ == "__main__":
-    main()
+    for name, m in MODELS.items():
+        build(name, **m)

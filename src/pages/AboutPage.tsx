@@ -119,7 +119,7 @@ export default function AboutPage() {
           </li>
           <li>
             Resolución IGAC 715 de 2018 — Marco Geocéntrico Nacional de Referencia
-            MAGNA-SIRGAS, época 2018.4.
+            MAGNA-SIRGAS, época 2018.0.
           </li>
           <li>
             Resolución IGAC 471 de 2020 — adopción del Origen Nacional (CTM12) para la

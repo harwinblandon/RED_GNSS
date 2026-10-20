@@ -2,7 +2,7 @@
  * Propagación de coordenadas entre épocas usando la velocidad de la estación.
  *
  * Las coordenadas oficiales del IGAC están en la época de referencia de
- * MAGNA-SIRGAS 2018.4 (Marco Geocéntrico Nacional de Referencia 2018,
+ * MAGNA-SIRGAS 2018.0 (ITRF2014; Marco Geocéntrico Nacional de Referencia 2018,
  * Resolución IGAC 715 de 2018). Para comparar contra un procesamiento hecho
  * con productos SIRGAS/IGS (que están en ITRF y en la época de observación),
  * conviene propagar la posición a esa época con la velocidad de la estación.
@@ -13,7 +13,7 @@ import { decimalYear } from './gpsTime'
 export { decimalYear }
 
 /** Época de referencia de las coordenadas oficiales MAGNA-SIRGAS. */
-export const MAGNA_SIRGAS_EPOCH = 2018.4
+export const MAGNA_SIRGAS_EPOCH = 2018.0
 
 const A = 6378137.0
 const F = 1 / 298.257222101

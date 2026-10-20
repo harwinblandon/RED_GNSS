@@ -76,7 +76,7 @@ export default function Layout() {
           <ThemeButton theme={theme} onToggle={toggle} />
         </div>
 
-        <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-5 sm:px-6 sm:py-8 lg:px-10">
+        <main className="mx-auto w-full max-w-[112rem] flex-1 px-3 py-5 sm:px-6 sm:py-8 lg:px-10">
           <Outlet />
         </main>
       </div>

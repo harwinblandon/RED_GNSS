@@ -171,7 +171,7 @@ export function StationCard({ s, lastDate, from }: { s: GnssStation; lastDate: s
       {s.status !== 'active' && <div className="mb-2 font-medium text-slate-900">Estación inactiva</div>}
 
       <div className="mb-2">
-        <div className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">MAGNA-SIRGAS · época 2018.4</div>
+        <div className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">MAGNA-SIRGAS · época 2018.0</div>
         <Row k="Latitud">{formatDms(s.lat, 'lat')}</Row>
         <Row k="Longitud">{formatDms(s.lon, 'lon')}</Row>
         {s.heightM != null && <Row k="h elipsoidal">{s.heightM.toFixed(3)} m</Row>}

@@ -60,6 +60,24 @@ body {
   @apply text-slate-200;
 }
 
+/* Fondo temático: curvas de nivel, red geodésica y órbitas GNSS (scripts/build-background.py).
+   El SVG se usa como máscara para colorearlo según el tema. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: #23262d;
+  opacity: 0.09;
+  -webkit-mask: url('./assets/fondo-geodesia.svg') center / cover no-repeat;
+  mask: url('./assets/fondo-geodesia.svg') center / cover no-repeat;
+}
+.dark body::before {
+  background-color: #e6e8ec;
+  opacity: 0.05;
+}
+
 .logo-graticule {
   opacity: 0.5;
 }
@@ -138,6 +156,7 @@ body {
 
 /* Impresión: solo el reporte, sin cromo de la aplicación */
 @media print {
+  body::before,
   aside,
   header,
   .print\:hidden {

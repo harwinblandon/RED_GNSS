@@ -8,6 +8,7 @@
  * una hoja por sección. Las librerías se cargan solo al exportar.
  */
 import type { CampaignPoint, GuideResult } from './guideAdjust'
+import type { ClientLogo } from './clientLogos'
 import { formatDms } from './format'
 
 export interface ReportMeta {
@@ -74,6 +75,8 @@ export interface ReportDoc {
   projectLabel: string
   signer: { name: string; matricula: string }
   fileName: string
+  /** Logos de los contratantes (el logo H_TOPOGRAFÍA es fijo y va siempre). */
+  extraLogos?: ClientLogo[]
 }
 
 export function safeFileName(prefix: string, project: string) {
@@ -254,13 +257,13 @@ const fmtCell = (v: Cell, f: ColFmt): string => {
 /** La fuente subconjunto no trae ≤ ≥. */
 const pdfSafe = (s: string) => s.replace(/≤/g, '<=').replace(/≥/g, '>=')
 
-async function asset(path: string): Promise<ArrayBuffer> {
+export async function asset(path: string): Promise<ArrayBuffer> {
   const r = await fetch(`${import.meta.env.BASE_URL}${path}`)
   if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`)
   return r.arrayBuffer()
 }
 
-function toBase64(buf: ArrayBuffer): string {
+export function toBase64(buf: ArrayBuffer): string {
   const bytes = new Uint8Array(buf)
   let bin = ''
   for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000))
@@ -280,7 +283,7 @@ async function logoJpeg(buf: ArrayBuffer, width = 600): Promise<string> {
   return c.toDataURL('image/jpeg', 0.9)
 }
 
-function save(blob: Blob, name: string) {
+export function save(blob: Blob, name: string) {
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
   a.download = name
@@ -472,14 +475,23 @@ export async function exportPdf(d: ReportDoc) {
     doc.setPage(i)
     const lh = 13
     doc.addImage(logoData, 'JPEG', M, 9, lh * LOGO_RATIO, lh, 'logo')
+    // Logos de los contratantes, alineados a la derecha.
+    let xr = W - M
+    ;(d.extraLogos ?? []).forEach((l, k) => {
+      const hh = 11
+      const ww = Math.min(38, hh * l.ratio)
+      xr -= ww
+      doc.addImage(l.dataUrl, 'PNG', xr, 10, ww, ww / l.ratio, `cliente${k}`)
+      xr -= 3
+    })
     doc.setFont('NotoSans', 'bold')
     doc.setFontSize(9)
     doc.setTextColor(BRAND)
-    doc.text('INFORME TÉCNICO', W - M, 13, { align: 'right' })
+    doc.text('INFORME TÉCNICO', xr, 13, { align: 'right' })
     doc.setFont('NotoSans', 'normal')
     doc.setFontSize(8)
     doc.setTextColor('#64748b')
-    doc.text(pdfSafe(d.projectLabel || d.title), W - M, 17.5, { align: 'right' })
+    doc.text(pdfSafe(d.projectLabel || d.title), xr, 17.5, { align: 'right' })
     doc.setDrawColor('#cbd5e1')
     doc.setLineWidth(0.3)
     doc.line(M, 25, W - M, 25)
@@ -502,7 +514,7 @@ const XL_FMT: Record<ColFmt, string | undefined> = {
   i: '0',
 }
 
-export async function exportExcel(d: ReportDoc) {
+export async function exportExcel(d: ReportDoc, protect?: ProtectOptions) {
   const [{ default: ExcelJS }, logo] = await Promise.all([import('exceljs'), asset('brand/logo.png')])
   const wb = new ExcelJS.Workbook()
   wb.creator = d.signer.name || 'H_TOPOGRAFÍA'
@@ -660,6 +672,84 @@ export async function exportExcel(d: ReportDoc) {
     sh.autoFilter = { from: { row: 6, column: 1 }, to: { row: 6, column: sec.table.head.length } }
   }
 
+  addClientLogosToWorkbook(wb, d.extraLogos ?? [])
+  await protectWorkbook(wb, protect ?? { password: '', author: d.signer.name, matricula: d.signer.matricula })
   const buf = await wb.xlsx.writeBuffer()
   save(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${d.fileName}.xlsx`)
+}
+
+/* ------------------------- protección y autoría ------------------------- */
+
+export interface ProtectOptions {
+  /** Contraseña para proteger las hojas; vacía = sin protección. */
+  password: string
+  author: string
+  matricula: string
+}
+
+/**
+ * Protege cada hoja (celdas, formato, imágenes) dejando seleccionar, copiar y
+ * filtrar, y pone la autoría en el pie de página impreso y en las propiedades
+ * del archivo. Excel no ofrece protección criptográfica de hojas: evita cambios
+ * casuales, no es una firma.
+ */
+export async function protectWorkbook(wb: import('exceljs').Workbook, o: ProtectOptions) {
+  const who = [o.author, o.matricula && `M.P. ${o.matricula}`].filter(Boolean).join(' · ')
+  wb.creator = o.author || 'H_TOPOGRAFÍA'
+  wb.lastModifiedBy = o.author || 'H_TOPOGRAFÍA'
+  wb.company = 'H_TOPOGRAFÍA'
+  wb.title = wb.title || 'Reporte H_TOPOGRAFÍA'
+  for (const ws of wb.worksheets) {
+    ws.headerFooter.oddFooter = `&L&8H_TOPOGRAFÍA${who ? ` · Elaborado por ${who}` : ''}&R&8Página &P de &N`
+    ws.headerFooter.evenFooter = ws.headerFooter.oddFooter
+    if (o.password)
+      await ws.protect(o.password, {
+        selectLockedCells: true,
+        selectUnlockedCells: true,
+        autoFilter: true,
+        sort: false,
+        formatCells: false,
+        formatColumns: false,
+        formatRows: false,
+        insertRows: false,
+        insertColumns: false,
+        deleteRows: false,
+        deleteColumns: false,
+        objects: false,
+        scenarios: false,
+      })
+  }
+}
+
+/**
+ * Coloca los logos de los contratantes en el encabezado de cada hoja, alineados
+ * a la derecha de la tabla (se llama al final, con los anchos de columna ya
+ * definidos). El logo H_TOPOGRAFÍA (A1) no se toca.
+ */
+export function addClientLogosToWorkbook(wb: import('exceljs').Workbook, logos: ClientLogo[]) {
+  if (!logos.length) return
+  const ids = logos.map((l) => wb.addImage({ base64: l.dataUrl.split(',')[1], extension: 'png' }))
+  const H = 46
+  for (const ws of wb.worksheets) {
+    const n = Math.max(ws.columnCount, 6)
+    const px = (c: number) => ((ws.getColumn(c).width ?? 9) * 7 + 5)
+    // posición (en columnas fraccionarias, base 0) de un desplazamiento en píxeles desde la izquierda
+    const colAt = (x: number) => {
+      let acc = 0
+      for (let c = 1; c <= n; c++) {
+        const w = px(c)
+        if (acc + w >= x) return c - 1 + (x - acc) / w
+        acc += w
+      }
+      return n
+    }
+    let right = 0
+    for (let c = 1; c <= n; c++) right += px(c)
+    logos.forEach((l, k) => {
+      const w = Math.round(H * Math.min(l.ratio, 3.2))
+      right -= w
+      ws.addImage(ids[k], { tl: { col: colAt(right), row: 0.15 }, ext: { width: w, height: Math.round(w / l.ratio) } })
+      right -= 10
+    })
+  }
 }

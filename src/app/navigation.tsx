@@ -10,6 +10,7 @@ import {
   MapIcon,
   MarkerIcon,
   MountainIcon,
+  ReportIcon,
   OrbitIcon,
   SatelliteIcon,
   SignalIcon,
@@ -33,6 +34,13 @@ export const NAV_ITEMS: NavItem[] = [
     icon: ClipboardIcon,
   },
   {
+    path: '/georreferenciacion',
+    label: 'Georreferenciación (Reporte Final)',
+    description:
+      'Del post-proceso al reporte de entrega: época de cada punto, velocidades VEMOS2022, cambio a 2018.0, CTM12 y cotas QGeoidCOL2023. Excel con tu logo y fórmulas verificables.',
+    icon: ReportIcon,
+  },
+  {
     path: '/mapa',
     label: 'Mapa de consulta',
     description:
@@ -43,7 +51,7 @@ export const NAV_ITEMS: NavItem[] = [
     path: '/estacion',
     label: 'Ficha de estación',
     description:
-      'Identidad, coordenadas oficiales (época 2018.4 y propagadas), equipo, solución semanal descargable y enlaces a SIRGAS.',
+      'Identidad, coordenadas oficiales (época 2018.0 y propagadas), equipo, solución semanal descargable y enlaces a SIRGAS.',
     icon: SatelliteIcon,
   },
   {

@@ -81,7 +81,7 @@ function systemLabel(s: string): string {
   return PROJECTED_CRS.find((c) => c.code === s)?.label ?? s
 }
 
-/** Acepta "2018.4" o "2018-05-26" → año decimal. */
+/** Acepta "2018.0" o "2018-05-26" → año decimal. */
 function parseEpoch(s: string): number | null {
   const t = s.trim()
   if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return decimalYear(new Date(`${t}T00:00:00Z`))
@@ -185,7 +185,7 @@ export default function EpochTransformPage() {
 
   async function transform() {
     if (fromEpoch == null || toEpoch == null) {
-      setMsg('Épocas no válidas. Usa año decimal (2018.4) o fecha (2026-09-08).')
+      setMsg('Épocas no válidas. Usa año decimal (2018.0) o fecha (2026-09-08).')
       return
     }
     if (parsed.points.length === 0) {
@@ -284,14 +284,14 @@ export default function EpochTransformPage() {
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <Field label="Época origen" hint="Año decimal o fecha.">
-                  <TextInput value={fromStr} onChange={(e) => setFromStr(e.target.value)} placeholder="2018.4" />
+                  <TextInput value={fromStr} onChange={(e) => setFromStr(e.target.value)} placeholder="2018.0" />
                 </Field>
                 <Field label="Época destino" hint="Año decimal o fecha.">
                   <TextInput value={toStr} onChange={(e) => setToStr(e.target.value)} placeholder="2026-09-08" />
                 </Field>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Las coordenadas oficiales del IGAC están en <strong>MAGNA-SIRGAS época 2018.4</strong>.
+                Las coordenadas oficiales del IGAC están en <strong>MAGNA-SIRGAS época 2018.0</strong>.
               </p>
             </div>
           </Card>

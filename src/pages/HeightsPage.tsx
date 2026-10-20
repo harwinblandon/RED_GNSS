@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ClientLogosField } from '../components/ClientLogosField'
+import { useClientLogos } from '../lib/clientLogos'
+import { ExcelProtectField } from '../components/ExcelProtectField'
 import { MapContainer, CircleMarker, Popup, Circle, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { PageHeader, Card, Field, TextInput, Select, DataRow, Button, ExternalLink } from '../components/ui'
@@ -72,6 +75,8 @@ export default function HeightsPage() {
   const [seed, setSeed] = useState({ text: '', key: 0 })
   const [meta, setMeta] = useReportMeta()
   const [busy, setBusy] = useState<'pdf' | 'xlsx' | null>(null)
+  const [xlsPassword, setXlsPassword] = useState('')
+  const [logos, setLogos] = useClientLogos()
   const [exportError, setExportError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -139,7 +144,8 @@ export default function HeightsPage() {
         benchmarkZeta: corrMode === 'benchmark' && selectedBm ? interpolate(q, selectedBm.lat, selectedBm.lon) : null,
         generated: new Date(),
       })
-      await (kind === 'pdf' ? exportPdf(doc) : exportExcel(doc))
+      doc.extraLogos = logos
+      await (kind === 'pdf' ? exportPdf(doc) : exportExcel(doc, { password: xlsPassword, author: meta.responsable, matricula: meta.matricula }))
     } catch (e) {
       setExportError(`No se pudo generar el archivo: ${(e as Error).message}`)
     } finally {
@@ -398,6 +404,12 @@ export default function HeightsPage() {
                   <Button onClick={() => downloadReport('xlsx')} disabled={busy != null}>{busy === 'xlsx' ? 'Generando…' : 'Excel (.xlsx)'}</Button>
                   <Button variant="secondary" onClick={exportCsv}>CSV</Button>
                 </div>
+              </div>
+              <div className="mt-3">
+                <ExcelProtectField value={xlsPassword} onChange={setXlsPassword} />
+              </div>
+              <div className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+                <ClientLogosField logos={logos} onChange={setLogos} />
               </div>
               {exportError && <p className="mt-2 text-xs text-rose-600">{exportError}</p>}
               <details className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-800">

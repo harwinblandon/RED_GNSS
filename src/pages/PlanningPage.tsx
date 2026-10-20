@@ -396,7 +396,7 @@ function PlanReport({ plan }: { plan: ReturnType<typeof buildPlan> }) {
           <WeeklySolutionButton />
         </div>
         <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-          En la Ficha están las coordenadas oficiales (época 2018.4 y propagadas a tu
+          En la Ficha están las coordenadas oficiales (época 2018.0 y propagadas a tu
           fecha) y los enlaces a las soluciones semanales SIRGAS/IGAC.
         </p>
       </Card>

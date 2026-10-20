@@ -113,7 +113,7 @@ function StationDetail({ station: s }: { station: GnssStation }) {
           Coordenadas geodésicas ajustadas (no navegadas) en el marco MAGNA-SIRGAS
           {s.datum ? ` (EPSG:${s.datum})` : ''}, calculadas por el Centro de Control
           Geodésico del IGAC. Están en una época de referencia fija de la realización
-          MAGNA-SIRGAS (~2018.4), sin propagar a la fecha actual. Para la posición en
+          MAGNA-SIRGAS 2018 (época 2018.0), sin propagar a la fecha actual. Para la posición en
           tu época de observación y la velocidad de la estación, usa la solución
           multianual de SIRGAS (abajo).
         </p>
@@ -405,7 +405,7 @@ function EpochCard({ s, latestWeekStart }: { s: GnssStation; latestWeekStart: st
       </div>
 
       <DataRow label="Época" value={`${toEpoch.toFixed(3)} (${targetDate})`} />
-      <DataRow label="Δ desde 2018.4" value={`${p.years.toFixed(2)} años`} />
+      <DataRow label="Δ desde 2018.0" value={`${p.years.toFixed(2)} años`} />
       <DataRow label="Desplazamiento" value={`N ${p.shiftNEU[0] >= 0 ? '+' : ''}${(p.shiftNEU[0] * 100).toFixed(1)} · E ${p.shiftNEU[1] >= 0 ? '+' : ''}${(p.shiftNEU[1] * 100).toFixed(1)} · A ${p.shiftNEU[2] >= 0 ? '+' : ''}${(p.shiftNEU[2] * 100).toFixed(1)} cm`} />
       <DataRow label="Latitud" value={formatDms(p.lat, 'lat')} />
       <DataRow label="Longitud" value={formatDms(p.lon, 'lon')} />

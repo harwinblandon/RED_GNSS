@@ -18,6 +18,7 @@ const CoordinatesPage = lazy(() => import('../pages/CoordinatesPage'))
 const EpochTransformPage = lazy(() => import('../pages/EpochTransformPage'))
 const EphemeridesPage = lazy(() => import('../pages/EphemeridesPage'))
 const HeightsPage = lazy(() => import('../pages/HeightsPage'))
+const GeorefPage = lazy(() => import('../pages/GeorefPage'))
 const AboutPage = lazy(() => import('../pages/AboutPage'))
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'))
 
@@ -52,6 +53,7 @@ export const router = createHashRouter([
       { path: 'epoca', element: <Lazy><EpochTransformPage /></Lazy> },
       { path: 'efemerides', element: <Lazy><EphemeridesPage /></Lazy> },
       { path: 'alturas', element: <Lazy><HeightsPage /></Lazy> },
+      { path: 'georreferenciacion', element: <Lazy><GeorefPage /></Lazy> },
       { path: 'acerca-de', element: <Lazy><AboutPage /></Lazy> },
       { path: '404', element: <Lazy><NotFoundPage /></Lazy> },
       { path: '*', element: <Navigate to="/404" replace /> },

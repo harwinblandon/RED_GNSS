@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { ClientLogosField } from './ClientLogosField'
+import { useClientLogos } from '../lib/clientLogos'
+import { ExcelProtectField } from './ExcelProtectField'
 import { Card, Field, TextInput, Select, Button } from './ui'
 import {
   adjustCampaign,
@@ -53,6 +56,8 @@ export function GuideCampaign({ leveling, initialText = '' }: { leveling: Benchm
   const [overrides, setOverrides] = useState<Record<string, number>>({})
   const fileRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState<'pdf' | 'xlsx' | null>(null)
+  const [xlsPassword, setXlsPassword] = useState('')
+  const [logos, setLogos] = useClientLogos()
   const [exportError, setExportError] = useState<string | null>(null)
 
 
@@ -114,8 +119,8 @@ export function GuideCampaign({ leveling, initialText = '' }: { leveling: Benchm
     setBusy(kind)
     setExportError(null)
     try {
-      const doc = guideReportDoc(data)
-      await (kind === 'pdf' ? exportPdf(doc) : exportExcel(doc))
+      const doc = { ...guideReportDoc(data), extraLogos: logos }
+      await (kind === 'pdf' ? exportPdf(doc) : exportExcel(doc, { password: xlsPassword, author: meta.responsable, matricula: meta.matricula }))
     } catch (e) {
       setExportError(`No se pudo generar el archivo: ${(e as Error).message}`)
     } finally {
@@ -224,6 +229,12 @@ export function GuideCampaign({ leveling, initialText = '' }: { leveling: Benchm
                   <Button onClick={() => download('xlsx')} disabled={busy != null}>{busy === 'xlsx' ? 'Generando…' : 'Excel (.xlsx)'}</Button>
                   <Button variant="secondary" onClick={exportCsv}>CSV</Button>
                 </div>
+              </div>
+              <div className="mt-3">
+                <ExcelProtectField value={xlsPassword} onChange={setXlsPassword} />
+              </div>
+              <div className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+                <ClientLogosField logos={logos} onChange={setLogos} />
               </div>
               {exportError && <p className="mt-2 text-xs text-rose-600">{exportError}</p>}
             </Card>
