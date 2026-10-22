@@ -4,8 +4,8 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // En local sirve en la raíz; en el build de CI se pasa VITE_BASE=/RED_GNSS/
-  // para GitHub Pages (proyecto en subcarpeta).
+  // Sirve en la raíz (dominio propio gnss.redhb.com, ver public/CNAME).
+  // VITE_BASE permite compilar para una subcarpeta si hiciera falta.
   base: process.env.VITE_BASE ?? '/',
   plugins: [react(), tailwindcss()],
 })

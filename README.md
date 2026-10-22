@@ -4,7 +4,7 @@ Aplicación web para agilizar el trabajo de gabinete en posicionamiento GNSS
 estático diferencial contra la Red Geodésica Nacional Activa (**MAGNA-ECO**) del
 IGAC.
 
-**En línea:** https://harwinblandon.github.io/RED_GNSS/
+**En línea:** https://gnss.redhb.com/
 
 Identidad visual en `src/components/Logo.tsx` (SVG, adapta a claro/oscuro);
 ver `brand/` para usar el logotipo en mapa de bits.
@@ -46,8 +46,9 @@ Node.js ≥ 20.
 ## Despliegue
 
 `.github/workflows/deploy.yml` compila y publica en **GitHub Pages** en cada push a
-`main`. El build de CI usa `VITE_BASE=/RED_GNSS/` (la app vive en una subcarpeta);
-en local `base` es `/`. En **Settings → Pages** la fuente debe ser *GitHub Actions*.
+`main`, con dominio propio `gnss.redhb.com` (`public/CNAME`; el DNS de Hostinger tiene
+un CNAME `gnss` → `harwinblandon.github.io`). El build de CI usa `VITE_BASE=/`;
+en local también. En **Settings → Pages** la fuente debe ser *GitHub Actions*.
 
 ## Estructura
 

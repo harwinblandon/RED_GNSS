@@ -27,7 +27,7 @@ jobs:
       - name: Compilar
         run: npm run build
         env:
-          VITE_BASE: /RED_GNSS/
+          VITE_BASE: /
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
