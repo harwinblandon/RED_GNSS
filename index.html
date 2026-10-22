@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" href="/pwa/apple-touch-icon.png" />
     <meta name="theme-color" content="#101216" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="H_GNSS" />
+    <meta name="apple-mobile-web-app-title" content="Plan_GNSS" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta
       name="description"
@@ -19,27 +19,26 @@
       /* Pantalla de bienvenida: visible hasta que React monta (src/main.tsx la retira). */
       #splash {
         position: fixed; inset: 0; z-index: 9999;
-        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
         background: #101216; color: #e6e8ec;
         font-family: 'Noto Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
         transition: opacity 0.45s ease;
       }
       #splash.out { opacity: 0; pointer-events: none; }
-      #splash .plate {
-        background: #fff; border-radius: 14px; padding: 18px 22px;
-        width: min(78vw, 360px); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
-        animation: splash-in 0.6s ease-out both;
+      #splash .sign {
+        position: relative;
+        animation: splash-in 0.7s ease-out both;
       }
-      #splash .plate img { display: block; width: 100%; height: auto; }
-      #splash .sub { font-size: 14px; letter-spacing: 0.04em; opacity: 0.75; animation: splash-in 0.6s 0.15s ease-out both; }
-      #splash .by {
-        position: absolute; bottom: max(28px, env(safe-area-inset-bottom));
-        display: flex; align-items: center; gap: 10px;
-        font-size: 13px; letter-spacing: 0.25em; text-transform: uppercase;
-        animation: splash-in 0.6s 0.3s ease-out both;
+      /* «by» va fuera del flujo para que la H quede centrada */
+      #splash .sign span {
+        position: absolute; right: calc(100% + 14px); bottom: 4px;
+        font-size: 18px; letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.65;
       }
-      #splash .by span { opacity: 0.6; }
-      #splash .by img { display: block; height: 34px; width: auto; }
+      #splash .sign img { display: block; height: min(32vh, 150px); width: auto; }
+      #splash .app {
+        font-size: 15px; letter-spacing: 0.35em; opacity: 0.8; margin-top: 10px;
+        animation: splash-in 0.7s 0.25s ease-out both;
+      }
       @keyframes splash-in { from { opacity: 0; transform: translateY(8px); } }
       @media (prefers-reduced-motion: reduce) {
         #splash, #splash * { animation: none !important; transition: none !important; }
@@ -48,9 +47,8 @@
   </head>
   <body>
     <div id="splash" aria-hidden="true">
-      <div class="plate"><img src="/brand/logo.png" alt="" /></div>
-      <div class="sub">Post-proceso GNSS</div>
-      <div class="by"><span>by</span><img src="/brand/h-mark.png" alt="H" /></div>
+      <div class="sign"><span>by</span><img src="/brand/h-mark.png" alt="H" /></div>
+      <div class="app">Plan_GNSS</div>
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

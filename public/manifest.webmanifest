@@ -1,6 +1,6 @@
 {
-  "name": "H_TOPOGRAFÍA · Post-proceso GNSS",
-  "short_name": "H_GNSS",
+  "name": "Plan_GNSS · Post-proceso GNSS by H",
+  "short_name": "Plan_GNSS",
   "description": "Asistente de post-proceso GNSS: estaciones MAGNA-ECO del IGAC, tiempos de ocupación, calendario GPS, efemérides y acceso a RINEX.",
   "lang": "es",
   "id": "./",
